@@ -8,9 +8,8 @@ import (
 	"time"
 )
 
-type data struct {
-	BigTime, SmallTime string
-}
+const LAT = 37.79
+const LNG = -122.42
 
 var tmpl = template.Must(template.New("page").Parse(PAGE))
 
@@ -49,10 +48,22 @@ func weekday(t *time.Time) int {
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
+	// TODO: Refresh minutely; use JS to fake things.
+	w.Header().Set("Refresh", "2")
+
 	now := Pacify(time.UTC())
-	d := data{
-		BigTime:   now.Format("3:04"),
-		SmallTime: now.Format(":05&thinsp;pm"),
+	d := map[string]map[string]string{
+		"Time": map[string]string{
+			"Big":     now.Format("3:04"),
+			"Small":   now.Format(":05&thinsp;pm"),
+			"Date":    now.Format("Sunday, January 2"),
+			"Sunrise": "7:24&thinsp;am",
+			"Sunset":  "4:52&thinsp;pm",
+		},
+		"Weather": map[string]string{
+			"Temp":     "12°",
+			"Forecast": DUMMY_FORECAST,
+		},
 	}
 	tmpl.Execute(w, d)
 }
@@ -63,6 +74,72 @@ func init() {
 
 const PAGE = `<!DOCTYPE html>
 <head>
-	<title>Clocky</title>
+    <title>Clocky</title>
+    <style>
+        body { font-size: 32px; margin: 0; }
+        div { margin: 4px; }
+        .header { font-weight: bold; }
+        .smaller { font-size: 61%; }
+        .larger { font-size: 164%; }
+        .box { position: absolute; }
+        .bus { margin: 8px 0 8px 0; }
+        .route { font-weight: bold; font-size: 24px; }
+        .arrivals { font-size: 20px; }
+    </style>
 </head>
-<div>{{.BigTime}}{{.SmallTime}}</div>`
+
+{{with .Time}}
+<div class=box style="width: 350px; height: 130px; top: 18px; left:24px; text-align: center; background-color: #eee">
+    <div class=header><span class=larger>{{.Big}}</span>{{.Small}}</div>
+    <div class=smaller>{{.Date}}</div>
+    <div class=smaller>sunrise {{.Sunrise}}; sunset {{.Sunset}}</div>
+</div>
+{{end}}
+
+{{with .Weather}}
+<div class=box style="width: 400px; top: 175px; left: 24px">
+    <div class=header><span class=larger>{{.Temp}}</span> calm, 96%</div>
+    <div class=smaller style="text-align: left">{{.Forecast}}</div>
+</div>
+{{end}}
+
+<div class=box style="width: 300px; left: 475px; top: 10px">
+    <div class=bus>
+        <div class=route>47 outbound</div>
+        <div class=arrivals>11, 30, 50, 68 minutes</div>
+    </div>
+    <div class=bus>
+        <div class=route>49 outbound</div>
+        <div class=arrivals>½, 19, 39, 59 minutes</div>
+    </div>
+    <div class=bus>
+        <div class=route>10, 12 outbound</div>
+        <div class=arrivals>18 minutes</div>
+    </div>
+    <div class=bus>
+        <div class=route>27 outbound</div>
+        <div class=arrivals>Probably never</div>
+    </div>
+    <div class=bus>
+        <div class=route>1 inbound</div>
+        <div class=arrivals>6½, 31, 51, 69 minutes</div>
+    </div>
+    <div class=bus>
+        <div class=route>1 outbound</div>
+        <div class=arrivals>Now, 41, 59, 79 minutes</div>
+    </div>
+</div>
+`
+
+// km/h, am, pm after number: convert no space or ASCII space to &thinsp;
+// line-ending number: change ASCII space to &nbsp;
+const DUMMY_FORECAST = `
+<div><span class=header>Tonight:</span> Patchy fog after
+10&thinsp;pm. Otherwise, mostly cloudy, with a low
+around&nbsp;9. Northwest wind around 10&thinsp;km/h becoming
+calm.</div>
+
+<div style="margin-top: 8px"><span class=header>Saturday:</span>
+Patchy fog before 10&thinsp;am. Otherwise, mostly sunny, with a high
+near&nbsp;16. North northeast wind between 10 and 13&thinsp;km/h
+becoming calm.</div>`
