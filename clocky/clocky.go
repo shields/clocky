@@ -65,8 +65,8 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	sunrise := Pacify(solar.Rise(now, Lat, Lng))
 	sunset := Pacify(solar.Set(now, Lat, Lng))
-	sun1 := "sunrise: " + sunrise.Format("3:04&thinsp;pm")
-	sun2 := "sunset: " + sunset.Format("3:04&thinsp;pm")
+	sun1 := "sunrise " + sunrise.Format("3:04&thinsp;pm")
+	sun2 := "sunset " + sunset.Format("3:04&thinsp;pm")
 	if sunrise.Seconds() > sunset.Seconds() {
 		sun1, sun2 = sun2, sun1
 	}
@@ -75,7 +75,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		"Time": map[string]string{
 			"Big":   now.Format("3:04"),
 			"Small": now.Format(":05&thinsp;pm"),
-			"Date":  now.Format("Sunday, January 2"),
+			"Date":  now.Format("Monday, January 2"),
 			"Sun1":  sun1,
 			"Sun2":  sun2,
 		},
@@ -109,15 +109,15 @@ const page = `<!DOCTYPE html>
 
 {{/* Everything temporarily down 50px to avoid blinking status bar in Boat. */}}
 {{with .Time}}
-<div class=box style="width: 350px; height: 130px; top: 74px; left:28px; text-align: center; background-color: #eee">
+<div class=box style="width: 350px; height: 128px; top: 74px; left:28px; text-align: center; background-color: #eee">
     <div class=header><span class=larger>{{.Big}}</span>{{.Small}}</div>
     <div class=smaller>{{.Date}}</div>
-    <div class=smaller>{{.Sun1}}; {{.Sun2}}</div>
+    <div class=smaller>{{.Sun1}}, {{.Sun2}}</div>
 </div>
 {{end}}
 
 {{with .Weather}}
-<div class=box style="width: 400px; top: 225px; left: 24px">
+<div class=box style="width: 400px; top: 220px; left: 24px">
     <div class=header><span class=larger>{{.Temp}}</span> calm, 96%</div>
     <div class=smaller style="text-align: left">{{.Forecast}}</div>
 </div>
