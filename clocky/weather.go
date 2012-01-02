@@ -112,8 +112,8 @@ func Forecast(c appengine.Context) map[string]string {
 				len(texts), len(periods))
 			continue
 		}
-		if len(texts) > 2 {
-			texts = texts[:2]
+		if len(texts) > 3 {
+			texts = texts[:3]
 		}
 		for i, text := range texts {
 			spaceSubs := make(map[int]string)
