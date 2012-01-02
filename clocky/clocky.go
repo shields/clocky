@@ -6,6 +6,8 @@ import (
 	"template"
 	"time"
 
+	"appengine"
+
 	"solar"
 )
 
@@ -47,9 +49,17 @@ func weekday(t *time.Time) int {
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/" {
+	if r.URL.Path != "/" && r.URL.Path != "/_ah/warmup" {
 		http.Error(w, "Not found", http.StatusNotFound)
 		return
+	}
+
+	// Data probably won't be fresh by the time we need it, but
+	// instead of blocking, it's better to serve what we have and
+	// warm up for the next refresh.
+	c := appengine.NewContext(r)
+	for _, s := range Sources {
+		go func(s *Source) { s.Freshen(c) }(s)
 	}
 
 	// TODO: Refresh minutely; use JS to fake things.

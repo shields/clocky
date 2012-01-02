@@ -1,105 +1,116 @@
 package clocky
 
 import (
-	"http"
-	"io"
 	"io/ioutil"
-	"log"
 	"os"
+	"strconv"
+	"time"
 
 	"appengine"
 	"appengine/memcache"
 	"appengine/urlfetch"
 )
 
-// http://www.sfmta.com/cms/asite/nextmunidata.htm
-const NextBusURL = ("http://webservices.nextbus.com/service/publicXMLFeed?" +
-	"command=predictionsForMultiStops&a=sf-muni" +
-	"&stops=1|null|4016" +
-	"&stop=1|null|6297" +
-	"&stops=10|null|5859" +
-	"&stops=12|null|5859" +
-	"&stops=27|null|35165" +
-	"&stops=47|null|6825" +
-	"&stops=49|null|6825")
+type Source struct {
+	Key                 string
+	URL                 string
+	Refresh, Expiration int
+}
 
-const WeatherURL = "http://forecast.weather.gov/MapClick.php?lat=37.79570&lon=-122.42100&FcstType=dwml&unit=1"
+var Sources = []*Source{
+	&Source{
+		Key: "nextbus",
+		// http://www.sfmta.com/cms/asite/nextmunidata.htm
+		URL: ("http://webservices.nextbus.com/service/publicXMLFeed?" +
+			"command=predictionsForMultiStops&a=sf-muni" +
+			"&stops=1|null|4016" +
+			"&stop=1|null|6297" +
+			"&stops=10|null|5859" +
+			"&stops=12|null|5859" +
+			"&stops=27|null|35165" +
+			"&stops=47|null|6825" +
+			"&stops=49|null|6825"),
+		Refresh:    10,
+		Expiration: 300,
+	},
+	&Source{
+		Key: "weather",
+		URL: ("http://forecast.weather.gov/MapClick.php?" +
+			"lat=37.79570&lon=-122.42100&FcstType=dwml&unit=1"),
+		// http://graphical.weather.gov/xml/mdl/XML/Design/WebServicesUseGuildlines.php
+		Refresh:    3600,
+		Expiration: 4 * 3600,
+	},
+}
 
-func fetch(r *http.Request, key, url string, expiration int32) os.Error {
-	c := appengine.NewContext(r)
+func (s Source) Fetch(c appengine.Context) os.Error {
+	c.Debugf("fetching %s data", s.Key)
 
 	client := urlfetch.Client(c)
-	resp, err := client.Get(url)
+	resp, err := client.Get(s.URL)
 	if err != nil {
-		log.Print(err)
+		c.Errorf("%q", err)
 		return err
 	}
 	contents, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Print(err)
+		c.Errorf("%q", err)
 		return err
 	}
 	resp.Body.Close()
 
 	item := &memcache.Item{
-		Key:        key,
+		Key:        s.Key,
 		Value:      contents,
-		Expiration: expiration,
+		Expiration: int32(s.Expiration),
 	}
 	if err := memcache.Set(c, item); err != nil {
-		log.Print(err)
+		c.Errorf("%q", err)
 		return err
 	}
 
-	log.Printf("fetched %d bytes of %s data", len(contents), key)
+	// We keep the last updated time in memcache.  It's not
+	// updated atomically with the page, so it's only used to
+	// limit the rate of fetches from the data servers.  Don't use
+	// it for display; use the data creation times in the data
+	// instead.  It doesn't matter to the user that we fetched a
+	// weather forecast 3 minutes ago if the forecast is 48
+	// minutes old.
+	item = &memcache.Item{
+		Key:   s.Key + "_fresh",
+		Value: []byte(strconv.Itoa64(time.Seconds())),
+	}
+	if err := memcache.Set(c, item); err != nil {
+		c.Errorf("%q", err)
+		return err
+	}
+
+	c.Infof("fetched %d bytes of %s data", len(contents), s.Key)
 	return nil
 }
 
-const NextBusKey = "nextbus"
-const WeatherKey = "weather"
-
-// Normally called whenever a page refresh notices stale data.
-func fetchNextBus(r *http.Request) os.Error {
-	return fetch(r, NextBusKey, NextBusURL, 300)
-}
-
-// Normally called hourly by cron.
-// http://graphical.weather.gov/xml/mdl/XML/Design/WebServicesUseGuildlines.php
-func fetchWeather(r *http.Request) os.Error {
-	return fetch(r, WeatherKey, WeatherURL, 4*3600)
-}
-
-func fetchNextBusHandler(w http.ResponseWriter, r *http.Request) {
-	if err := fetchNextBus(r); err != nil {
-		http.Error(w, err.String(), http.StatusInternalServerError)
-		return
+// Freshen calls Fetch iff the item is not known to be fresh.
+func (s *Source) Freshen(c appengine.Context) os.Error {
+	item, err := memcache.Get(c, s.Key+"_fresh")
+	if err == memcache.ErrCacheMiss {
+		return s.Fetch(c)
+	} else if err != nil {
+		c.Errorf("%q", err)
+		// Something is wrong with memcache, so don't try to fetch.
+		return err
 	}
-	io.WriteString(w, "ok\n")
-}
 
-func fetchWeatherHandler(w http.ResponseWriter, r *http.Request) {
-	if err := fetchWeather(r); err != nil {
-		http.Error(w, err.String(), http.StatusInternalServerError)
-		return
+	fresh, err := strconv.Atoi64(string(item.Value))
+	if err != nil {
+		c.Errorf("%q", err)
+		return s.Fetch(c)
 	}
-	io.WriteString(w, "ok\n")
-}
 
-func warmup(w http.ResponseWriter, r *http.Request) {
-	ch := make(chan os.Error)
-	go func() { ch <- fetchNextBus(r) }()
-	go func() { ch <- fetchWeather(r) }()
-	for i := 0; i < 2; i++ {
-		if err := <-ch; err != nil {
-			http.Error(w, err.String(), http.StatusInternalServerError)
-			return
-		}
+	stale := fresh + int64(s.Refresh)
+	if stale > time.Seconds() {
+		c.Debugf("not fetching %s until %d", s.Key, stale)
+		return nil
 	}
-	io.WriteString(w, "ok\n")
-}
-
-func init() {
-	http.HandleFunc("/fetch/nextbus", fetchNextBusHandler)
-	http.HandleFunc("/fetch/weather", fetchWeatherHandler)
-	http.HandleFunc("/_ah/warmup", warmup)
+	c.Debugf("%s is stale since %d", s.Key, stale)
+	return s.Fetch(c)
 }
