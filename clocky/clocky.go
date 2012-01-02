@@ -55,6 +55,11 @@ func sunFormat(now, t *time.Time) (s string) {
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path != "/" {
+		http.Error(w, "Not found", http.StatusNotFound)
+		return
+	}
+
 	// TODO: Refresh minutely; use JS to fake things.
 	// TODO: Have browser refresh; safer since error pages will get retried.
 	w.Header().Set("Refresh", "2")
