@@ -53,10 +53,13 @@ func fetch(r *http.Request, key, url string, expiration int32) os.Error {
 const nextBusKey = "nextbus"
 const weatherKey = "weather"
 
+// Normally called whenever a page refresh notices stale data.
 func fetchNextBus(r *http.Request) os.Error {
 	return fetch(r, nextBusKey, NextBusURL, 300)
 }
 
+// Normally called hourly by cron.
+// http://graphical.weather.gov/xml/mdl/XML/Design/WebServicesUseGuildlines.php
 func fetchWeather(r *http.Request) os.Error {
 	return fetch(r, weatherKey, WeatherURL, 4*3600)
 }
@@ -78,13 +81,14 @@ func fetchWeatherHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func warmup(w http.ResponseWriter, r *http.Request) {
-	if err := fetchNextBus(r); err != nil {
-		http.Error(w, err.String(), http.StatusInternalServerError)
-		return
-	}
-	if err := fetchWeather(r); err != nil {
-		http.Error(w, err.String(), http.StatusInternalServerError)
-		return
+	ch := make(chan os.Error)
+	go func() { ch <- fetchNextBus(r) }()
+	go func() { ch <- fetchWeather(r) }()
+	for i := 0; i < 2; i++ {
+		if err := <-ch; err != nil {
+			http.Error(w, err.String(), http.StatusInternalServerError)
+			return
+		}
 	}
 	io.WriteString(w, "ok\n")
 }
@@ -92,5 +96,5 @@ func warmup(w http.ResponseWriter, r *http.Request) {
 func init() {
 	http.HandleFunc("/fetch/nextbus", fetchNextBusHandler)
 	http.HandleFunc("/fetch/weather", fetchWeatherHandler)
-	http.HandleFunc("/ah/_warmup", warmup)
+	http.HandleFunc("/_ah/warmup", warmup)
 }
