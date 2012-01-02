@@ -123,7 +123,7 @@ func Forecast(c appengine.Context) map[string]string {
 			}
 			matches = thinspRegexp.FindAllStringIndex(text, -1)
 			for i := 0; i < len(matches[0]); i += 2 {
-				spaceSubs[matches[0][i]+1] = "&thinsp;"
+				spaceSubs[matches[0][i]+1] = `<span style="white-space: nowrap">&thinsp;</span>`
 			}
 			cleanText := ""
 			for i, ch := range text {
