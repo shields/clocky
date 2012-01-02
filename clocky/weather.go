@@ -6,6 +6,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"template"
 	"xml"
 
 	"appengine"
@@ -27,27 +28,27 @@ func Conditions(c appengine.Context) map[string]string {
 		c.Errorf("%q", err)
 		return nil
 	}
-	cond := struct {
+
+	data := struct {
 		Temp_c      string
 		WindChill_c string
 		Wind_Mph    string
 	}{}
-
 	p := newParser(item.Value)
-	if err = p.Unmarshal(&cond, nil); err != nil {
+	if err = p.Unmarshal(&data, nil); err != nil {
 		c.Errorf("%q", err)
 		return nil
 	}
 
 	result := make(map[string]string)
-	if cond.Temp_c != "" {
-		result["Temp"] = cond.Temp_c + "°"
+	if data.Temp_c != "" {
+		result["Temp"] = template.HTMLEscapeString(data.Temp_c) + "°"
 	}
-	if cond.WindChill_c != "" {
-		result["WindChill"] = "wind chill " + cond.WindChill_c + "°"
+	if data.WindChill_c != "" {
+		result["WindChill"] = "wind chill " + template.HTMLEscapeString(data.WindChill_c) + "°"
 	}
-	if cond.Wind_Mph != "" {
-		mph, err := strconv.Atof64(cond.Wind_Mph)
+	if data.Wind_Mph != "" {
+		mph, err := strconv.Atof64(data.Wind_Mph)
 		if err == nil {
 			result["Wind"] = fmt.Sprintf("wind %d&thinsp;km/h", int(mph*1.609344))
 		}
@@ -56,7 +57,67 @@ func Conditions(c appengine.Context) map[string]string {
 }
 
 func Forecast(c appengine.Context) map[string]string {
-	return map[string]string{"Forecast": dummyForecast}
+	item, err := memcache.Get(c, "forecast")
+	if err != nil {
+		c.Errorf("%q", err)
+		return nil
+	}
+
+	data := struct {
+		Data []struct {
+			Type       string `xml:"attr"`
+			TimeLayout []struct {
+				LayoutKey      string `xml:"layout-key"`
+				StartValidTime []struct {
+					PeriodName string `xml:"attr"`
+				}
+			}
+			Parameters struct {
+				WordedForecast struct {
+					TimeLayout string   `xml:"attr"`
+					Text       []string `xml:"name>text"`
+				}
+			}
+		}
+	}{}
+	p := newParser(item.Value)
+	if err = p.Unmarshal(&data, nil); err != nil {
+		c.Errorf("%q", err)
+		return nil
+	}
+
+	forecast := ""
+	for _, d := range data.Data {
+		if d.Type != "forecast" {
+			continue
+		}
+		var periods []string
+		for _, tl := range d.TimeLayout {
+			if tl.LayoutKey != d.Parameters.WordedForecast.TimeLayout {
+				continue
+			}
+			for _, svt := range tl.StartValidTime {
+				periods = append(periods, svt.PeriodName)
+			}
+		}
+		texts := d.Parameters.WordedForecast.Text
+		if len(texts) != len(periods) {
+			c.Errorf("weather: len(texts) = %d, len(periods) = %d",
+				len(texts), len(periods))
+			continue
+		}
+		if len(texts) > 2 {
+			texts = texts[:2]
+		}
+		for i, text := range texts {
+			forecast += fmt.Sprintf(
+				`<div style="margin-bottom: 8px"><span class=header>%s:</span> %s</div>`,
+				template.HTMLEscapeString(periods[i]),
+				text)
+		}
+	}
+
+	return map[string]string{"Forecast": forecast}
 }
 
 // km/h, am, pm after number: convert no space or ASCII space to &thinsp;
