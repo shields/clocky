@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 	"template"
@@ -55,6 +56,11 @@ func Conditions(c appengine.Context) map[string]string {
 	}
 	return result
 }
+
+var (
+	nbspRegexp   = regexp.MustCompile(` [0-9]+\.`)
+	thinspRegexp = regexp.MustCompile(`[0-9] (am|pm|km/h)`)
+)
 
 func Forecast(c appengine.Context) map[string]string {
 	item, err := memcache.Get(c, "forecast")
@@ -110,10 +116,28 @@ func Forecast(c appengine.Context) map[string]string {
 			texts = texts[:2]
 		}
 		for i, text := range texts {
+			spaceSubs := make(map[int]string)
+			matches := nbspRegexp.FindAllStringIndex(text, -1)
+			for i := 0; i < len(matches[0]); i += 2 {
+				spaceSubs[matches[0][i]] = "&nbsp;"
+			}
+			matches = thinspRegexp.FindAllStringIndex(text, -1)
+			for i := 0; i < len(matches[0]); i += 2 {
+				spaceSubs[matches[0][i]+1] = "&thinsp;"
+			}
+			cleanText := ""
+			for i, ch := range text {
+				sub, ok := spaceSubs[i]
+				if ok {
+					cleanText += sub
+				} else {
+					cleanText += string(ch)
+				}
+			}
 			forecast += fmt.Sprintf(
 				`<div style="margin-bottom: 8px"><span class=header>%s:</span> %s</div>`,
 				template.HTMLEscapeString(periods[i]),
-				text)
+				cleanText)
 		}
 	}
 
@@ -121,7 +145,7 @@ func Forecast(c appengine.Context) map[string]string {
 }
 
 // km/h, am, pm after number: convert no space or ASCII space to &thinsp;
-// line-ending number: change ASCII space to &nbsp;
+// sentence-ending number: change ASCII space to &nbsp;
 const dummyForecast = `
 <div><span class=header>Tonight:</span> Patchy fog after
 10&thinsp;pm. Otherwise, mostly cloudy, with a low
