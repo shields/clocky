@@ -90,7 +90,7 @@ const page = `<!DOCTYPE html>
 <head>
     <title>Clocky</title>
     <style>
-        body { font-size: 32px; margin: 0; }
+        body { font-size: 32px; font-family: sans-serif; margin: 0; }
         div { margin: 4px; }
         .header { font-weight: bold; }
         .smaller { font-size: 61%; }
