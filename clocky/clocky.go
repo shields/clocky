@@ -33,6 +33,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		"Time":       Time(c),
 		"Conditions": Conditions(c),
 		"Forecast":   Forecast(c),
+		"NextBus":    NextBus(c),
 	}
 	tmpl.Execute(w, d)
 }
@@ -75,30 +76,5 @@ const page = `<!DOCTYPE html>
     <div class=smaller style="text-align: left">{{.Forecast.Forecast}}</div>
 </div>
 
-<div class=box style="width: 300px; top: 66px; left: 475px">
-    <div class=bus>
-        <div class=route>47 outbound</div>
-        <div class=arrivals>11, 30, 50, 68 minutes</div>
-    </div>
-    <div class=bus>
-        <div class=route>49 outbound</div>
-        <div class=arrivals>½, 19, 39, 59 minutes</div>
-    </div>
-    <div class=bus>
-        <div class=route>10, 12 outbound</div>
-        <div class=arrivals>18 minutes</div>
-    </div>
-    <div class=bus>
-        <div class=route>27 outbound</div>
-        <div class=arrivals>Probably never</div>
-    </div>
-    <div class=bus>
-        <div class=route>1 inbound</div>
-        <div class=arrivals>6½, 31, 51, 69 minutes</div>
-    </div>
-    <div class=bus>
-        <div class=route>1 outbound</div>
-        <div class=arrivals>now, 41, 59, 79 minutes</div>
-    </div>
-</div>
+{{.NextBus.NextBus}}
 `
