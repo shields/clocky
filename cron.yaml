@@ -1,3 +1,5 @@
+# NWS asks that you not poll more than once an hour.
+# http://graphical.weather.gov/xml/mdl/XML/Design/WebServicesUseGuildlines.php
 cron:
 - url: /fetch/weather
   schedule: every 60 minutes
