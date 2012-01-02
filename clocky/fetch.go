@@ -55,18 +55,18 @@ func fetch(r *http.Request, key, url string, expiration int32) os.Error {
 	return nil
 }
 
-const nextBusKey = "nextbus"
-const weatherKey = "weather"
+const NextBusKey = "nextbus"
+const WeatherKey = "weather"
 
 // Normally called whenever a page refresh notices stale data.
 func fetchNextBus(r *http.Request) os.Error {
-	return fetch(r, nextBusKey, NextBusURL, 300)
+	return fetch(r, NextBusKey, NextBusURL, 300)
 }
 
 // Normally called hourly by cron.
 // http://graphical.weather.gov/xml/mdl/XML/Design/WebServicesUseGuildlines.php
 func fetchWeather(r *http.Request) os.Error {
-	return fetch(r, weatherKey, WeatherURL, 4*3600)
+	return fetch(r, WeatherKey, WeatherURL, 4*3600)
 }
 
 func fetchNextBusHandler(w http.ResponseWriter, r *http.Request) {
