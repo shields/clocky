@@ -32,7 +32,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	d := map[string]map[string]string{
 		"Time":       Time(c),
 		"Conditions": Conditions(c),
-		"Forecast":   map[string]string{"Forecast": dummyForecast},
+		"Forecast":   Forecast(c),
 	}
 	tmpl.Execute(w, d)
 }
@@ -102,16 +102,3 @@ const page = `<!DOCTYPE html>
     </div>
 </div>
 `
-
-// km/h, am, pm after number: convert no space or ASCII space to &thinsp;
-// line-ending number: change ASCII space to &nbsp;
-const dummyForecast = `
-<div><span class=header>Tonight:</span> Patchy fog after
-10&thinsp;pm. Otherwise, mostly cloudy, with a low
-around&nbsp;9. Northwest wind around 10&thinsp;km/h becoming
-calm.</div>
-
-<div style="margin-top: 8px"><span class=header>Saturday:</span>
-Patchy fog before 10&thinsp;am. Otherwise, mostly sunny, with a high
-near&nbsp;16. North northeast wind between 10 and 13&thinsp;km/h
-becoming calm.</div>`

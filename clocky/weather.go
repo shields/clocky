@@ -12,6 +12,15 @@ import (
 	"appengine/memcache"
 )
 
+func newParser(b []byte) (p *xml.Parser) {
+	// NWS serves XML in ISO-8859-1 for no reason; the data is really ASCII.
+	p = xml.NewParser(strings.NewReader(string(b)))
+	p.CharsetReader = func(charset string, input io.Reader) (io.Reader, os.Error) {
+		return input, nil
+	}
+	return p
+}
+
 func Conditions(c appengine.Context) map[string]string {
 	item, err := memcache.Get(c, "conditions")
 	if err != nil {
@@ -24,11 +33,7 @@ func Conditions(c appengine.Context) map[string]string {
 		Wind_Mph    string
 	}{}
 
-	// NWS serves XML in ISO-8859-1 for no reason; the data is really ASCII.
-	p := xml.NewParser(strings.NewReader(string(item.Value)))
-	p.CharsetReader = func(charset string, input io.Reader) (io.Reader, os.Error) {
-		return input, nil
-	}
+	p := newParser(item.Value)
 	if err = p.Unmarshal(&cond, nil); err != nil {
 		c.Errorf("%q", err)
 		return nil
@@ -49,3 +54,20 @@ func Conditions(c appengine.Context) map[string]string {
 	}
 	return result
 }
+
+func Forecast(c appengine.Context) map[string]string {
+	return map[string]string{"Forecast": dummyForecast}
+}
+
+// km/h, am, pm after number: convert no space or ASCII space to &thinsp;
+// line-ending number: change ASCII space to &nbsp;
+const dummyForecast = `
+<div><span class=header>Tonight:</span> Patchy fog after
+10&thinsp;pm. Otherwise, mostly cloudy, with a low
+around&nbsp;9. Northwest wind around 10&thinsp;km/h becoming
+calm.</div>
+
+<div style="margin-top: 8px"><span class=header>Saturday:</span>
+Patchy fog before 10&thinsp;am. Otherwise, mostly sunny, with a high
+near&nbsp;16. North northeast wind between 10 and 13&thinsp;km/h
+becoming calm.</div>`
