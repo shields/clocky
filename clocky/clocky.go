@@ -11,7 +11,7 @@ import (
 const LAT = 37.79
 const LNG = -122.42
 
-var tmpl = template.Must(template.New("page").Parse(PAGE))
+var tmpl = template.Must(template.New("page").Parse(page))
 
 // Pacify converts utc to US Pacific time (2007 rules).  We have to do
 // this by hand because Go r60 doesn't have any real time zone
@@ -62,7 +62,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		},
 		"Weather": map[string]string{
 			"Temp":     "12°",
-			"Forecast": DUMMY_FORECAST,
+			"Forecast": dummyForecast,
 		},
 	}
 	tmpl.Execute(w, d)
@@ -72,7 +72,7 @@ func init() {
 	http.HandleFunc("/", handler)
 }
 
-const PAGE = `<!DOCTYPE html>
+const page = `<!DOCTYPE html>
 <head>
     <title>Clocky</title>
     <style>
@@ -133,7 +133,7 @@ const PAGE = `<!DOCTYPE html>
 
 // km/h, am, pm after number: convert no space or ASCII space to &thinsp;
 // line-ending number: change ASCII space to &nbsp;
-const DUMMY_FORECAST = `
+const dummyForecast = `
 <div><span class=header>Tonight:</span> Patchy fog after
 10&thinsp;pm. Otherwise, mostly cloudy, with a low
 around&nbsp;9. Northwest wind around 10&thinsp;km/h becoming
