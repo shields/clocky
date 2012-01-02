@@ -141,7 +141,7 @@ const page = `<!DOCTYPE html>
     </div>
     <div class=bus>
         <div class=route>1 outbound</div>
-        <div class=arrivals>Now, 41, 59, 79 minutes</div>
+        <div class=arrivals>now, 41, 59, 79 minutes</div>
     </div>
 </div>
 `
