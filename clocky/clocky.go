@@ -106,8 +106,9 @@ const page = `<!DOCTYPE html>
     </style>
 </head>
 
+{{/* Everything temporarily down 50px to avoid blinking status bar in Boat. */}}
 {{with .Time}}
-<div class=box style="width: 350px; height: 130px; top: 18px; left:24px; text-align: center; background-color: #eee">
+<div class=box style="width: 350px; height: 130px; top: 74px; left:28px; text-align: center; background-color: #eee">
     <div class=header><span class=larger>{{.Big}}</span>{{.Small}}</div>
     <div class=smaller>{{.Date}}</div>
     <div class=smaller>{{.Sun1}}; {{.Sun2}}</div>
@@ -115,13 +116,13 @@ const page = `<!DOCTYPE html>
 {{end}}
 
 {{with .Weather}}
-<div class=box style="width: 400px; top: 175px; left: 24px">
+<div class=box style="width: 400px; top: 225px; left: 24px">
     <div class=header><span class=larger>{{.Temp}}</span> calm, 96%</div>
     <div class=smaller style="text-align: left">{{.Forecast}}</div>
 </div>
 {{end}}
 
-<div class=box style="width: 300px; left: 475px; top: 10px">
+<div class=box style="width: 300px; top: 66px; left: 475px">
     <div class=bus>
         <div class=route>47 outbound</div>
         <div class=arrivals>11, 30, 50, 68 minutes</div>
