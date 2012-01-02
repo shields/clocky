@@ -4,6 +4,7 @@ import (
 	"http"
 	"io"
 	"io/ioutil"
+	"log"
 	"os"
 
 	"appengine"
@@ -30,10 +31,12 @@ func fetch(r *http.Request, key, url string, expiration int32) os.Error {
 	client := urlfetch.Client(c)
 	resp, err := client.Get(url)
 	if err != nil {
+		log.Print(err)
 		return err
 	}
 	contents, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
+		log.Print(err)
 		return err
 	}
 	resp.Body.Close()
@@ -44,9 +47,11 @@ func fetch(r *http.Request, key, url string, expiration int32) os.Error {
 		Expiration: expiration,
 	}
 	if err := memcache.Set(c, item); err != nil {
+		log.Print(err)
 		return err
 	}
 
+	log.Printf("fetched %d bytes of %s data", len(contents), key)
 	return nil
 }
 
