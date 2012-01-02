@@ -2,7 +2,6 @@ package clocky
 
 import (
 	"fmt"
-	"log"
 	"http"
 	"template"
 	"time"
@@ -33,7 +32,6 @@ func Pacify(utc *time.Time) *time.Time {
 	local := time.SecondsToUTC(utc.Seconds() + int64(offset))
 	local.ZoneOffset = offset
 	local.Zone = zone
-	log.Println(local)
 	return local
 }
 
