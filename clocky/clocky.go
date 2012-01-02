@@ -6,10 +6,11 @@ import (
 	"http"
 	"template"
 	"time"
+
+	"solar"
 )
 
-const LAT = 37.79
-const LNG = -122.42
+const Lat, Lng = 37.79, -122.42
 
 var tmpl = template.Must(template.New("page").Parse(page))
 
@@ -49,16 +50,20 @@ func weekday(t *time.Time) int {
 
 func handler(w http.ResponseWriter, r *http.Request) {
 	// TODO: Refresh minutely; use JS to fake things.
+	// TODO: Have browser refresh; safer since error pages will get retried.
 	w.Header().Set("Refresh", "2")
 
 	now := Pacify(time.UTC())
+	sunrise := Pacify(solar.Rise(now, Lat, Lng))
+	sunset := Pacify(solar.Set(now, Lat, Lng))
+
 	d := map[string]map[string]string{
 		"Time": map[string]string{
 			"Big":     now.Format("3:04"),
 			"Small":   now.Format(":05&thinsp;pm"),
 			"Date":    now.Format("Sunday, January 2"),
-			"Sunrise": "7:24&thinsp;am",
-			"Sunset":  "4:52&thinsp;pm",
+			"Sunrise": sunrise.Format("3:04&thinsp;pm"),
+			"Sunset":  sunset.Format("3:04&thinsp;pm"),
 		},
 		"Weather": map[string]string{
 			"Temp":     "12°",
