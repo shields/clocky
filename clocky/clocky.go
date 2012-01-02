@@ -46,14 +46,6 @@ func weekday(t *time.Time) int {
 	return (y + y/4 - y/100 + y/400 + sakamotoTable[t.Month] + t.Day) % 7
 }
 
-func sunFormat(now, t *time.Time) (s string) {
-	s = t.Format("3:04&thinsp;pm")
-	if now.Day != t.Day {
-		s += " tomorrow"
-	}
-	return s
-}
-
 func handler(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
 		http.Error(w, "Not found", http.StatusNotFound)
