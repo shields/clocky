@@ -1,0 +1,3 @@
+cron:
+- url: /fetch/weather
+  schedule: every 60 minutes

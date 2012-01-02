@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<dwml version="1.0" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.nws.noaa.gov/mdl/survey/pgb_survey/dev/DWMLgen/schema/DWML.xsd">
+  <head>
+    <product concise-name="dwmlByDay" operational-mode="developmental" srsName="WGS 1984">
+      <creation-date refresh-frequency='PT1H'>2011-12-30T21:12:04-08:00</creation-date>
+     <category>current observations and forecast</category>
+    </product>
+    <source>
+      <production-center>San Francisco Bay Area/Monterey, CA</production-center>
+      <credit>http://www.wrh.noaa.gov/mtr</credit>
+      <more-information>http://www.nws.noaa.gov/forecasts/xml/</more-information>
+    </source>
+  </head>
+  <data type="forecast">
+
+  <location>
+    <location-key>point1</location-key>
+    <point latitude="37.79" longitude="-122.42"/>
+    <area-description>3 Miles N San Francisco CA</area-description>
+    <height datum="mean sea level" height-units="feet">60</height>
+  </location>
+<moreWeatherInformation applicable-location="point1">http://forecast.weather.gov/MapClick.php?lat=37.79&amp;lon=-122.42</moreWeatherInformation>
+  <time-layout time-coordinate="local" summarization="12hourly">
+    <layout-key>k-p12h-n14-1</layout-key>
+      <start-valid-time period-name="Overnight">2011-12-31T00:00:00-08:00</start-valid-time>
+      <start-valid-time period-name="Saturday">2011-12-31T06:00:00-08:00</start-valid-time>
+      <start-valid-time period-name="Saturday Night">2011-12-31T18:00:00-08:00</start-valid-time>
+      <start-valid-time period-name="New:Year's Day">2012-01-01T06:00:00-08:00</start-valid-time>
+      <start-valid-time period-name="Sunday Night">2012-01-01T18:00:00-08:00</start-valid-time>
+      <start-valid-time period-name="Monday">2012-01-02T06:00:00-08:00</start-valid-time>
+      <start-valid-time period-name="Monday Night">2012-01-02T18:00:00-08:00</start-valid-time>
+      <start-valid-time period-name="Tuesday">2012-01-03T06:00:00-08:00</start-valid-time>
+      <start-valid-time period-name="Tuesday Night">2012-01-03T18:00:00-08:00</start-valid-time>
+      <start-valid-time period-name="Wednesday">2012-01-04T06:00:00-08:00</start-valid-time>
+      <start-valid-time period-name="Wednesday Night">2012-01-04T18:00:00-08:00</start-valid-time>
+      <start-valid-time period-name="Thursday">2012-01-05T06:00:00-08:00</start-valid-time>
+      <start-valid-time period-name="Thursday Night">2012-01-05T18:00:00-08:00</start-valid-time>
+      <start-valid-time period-name="Friday">2012-01-06T06:00:00-08:00</start-valid-time>
+  </time-layout>
+
+  <time-layout time-coordinate="local" summarization="12hourly">
+    <layout-key>k-p24h-n7-1</layout-key>
+      <start-valid-time period-name="Overnight">2011-12-31T00:00:00-08:00</start-valid-time>
+      <start-valid-time period-name="Saturday Night">2011-12-31T18:00:00-08:00</start-valid-time>
+      <start-valid-time period-name="Sunday Night">2012-01-01T18:00:00-08:00</start-valid-time>
+      <start-valid-time period-name="Monday Night">2012-01-02T18:00:00-08:00</start-valid-time>
+      <start-valid-time period-name="Tuesday Night">2012-01-03T18:00:00-08:00</start-valid-time>
+      <start-valid-time period-name="Wednesday Night">2012-01-04T18:00:00-08:00</start-valid-time>
+      <start-valid-time period-name="Thursday Night">2012-01-05T18:00:00-08:00</start-valid-time>
+  </time-layout>
+
+  <time-layout time-coordinate="local" summarization="12hourly">
+    <layout-key>k-p24h-n7-2</layout-key>
+      <start-valid-time period-name="Saturday">2011-12-31T06:00:00-08:00</start-valid-time>
+      <start-valid-time period-name="New:Year's Day">2012-01-01T06:00:00-08:00</start-valid-time>
+      <start-valid-time period-name="Monday">2012-01-02T06:00:00-08:00</start-valid-time>
+      <start-valid-time period-name="Tuesday">2012-01-03T06:00:00-08:00</start-valid-time>
+      <start-valid-time period-name="Wednesday">2012-01-04T06:00:00-08:00</start-valid-time>
+      <start-valid-time period-name="Thursday">2012-01-05T06:00:00-08:00</start-valid-time>
+      <start-valid-time period-name="Friday">2012-01-06T06:00:00-08:00</start-valid-time>
+  </time-layout>
+
+
+  <parameters applicable-location="point1">
+
+    <temperature type="minimum" units="Celsius" time-layout="k-p24h-n7-1">
+      <name>Daily Minimum Temperature</name>
+        <value>9</value>
+        <value>9</value>
+        <value>10</value>
+        <value>9</value>
+        <value>10</value>
+        <value>9</value>
+        <value>8</value>
+    </temperature>
+
+    <temperature type="maximum" units="Celsius" time-layout="k-p24h-n7-2">
+      <name>Daily Maximum Temperature</name>
+        <value>16</value>
+        <value>17</value>
+        <value>17</value>
+        <value>18</value>
+        <value>16</value>
+        <value>16</value>
+        <value>16</value>
+    </temperature>
+
+    <probability-of-precipitation  type="12 hour" units="percent" time-layout="k-p12h-n14-1">
+      <name>12 Hourly Probability of Precipitation</name>
+        <value xsi:nil="true"></value>
+        <value xsi:nil="true"></value>
+        <value xsi:nil="true"></value>
+        <value xsi:nil="true"></value>
+        <value xsi:nil="true"></value>
+        <value xsi:nil="true"></value>
+        <value xsi:nil="true"></value>
+        <value xsi:nil="true"></value>
+        <value xsi:nil="true"></value>
+        <value xsi:nil="true"></value>
+        <value xsi:nil="true"></value>
+        <value xsi:nil="true"></value>
+        <value xsi:nil="true"></value>
+        <value xsi:nil="true"></value>
+    </probability-of-precipitation>
+
+    <weather time-layout="k-p12h-n14-1">
+      <name>Weather Type, Coverage, Intensity</name>
+        <weather-conditions weather-summary="Patchy Fog"/>
+        <weather-conditions weather-summary="Patchy Fog"/>
+        <weather-conditions weather-summary="Mostly Clear"/>
+        <weather-conditions weather-summary="Sunny"/>
+        <weather-conditions weather-summary="Partly Cloudy"/>
+        <weather-conditions weather-summary="Mostly Sunny"/>
+        <weather-conditions weather-summary="Partly Cloudy"/>
+        <weather-conditions weather-summary="Mostly Sunny"/>
+        <weather-conditions weather-summary="Partly Cloudy"/>
+        <weather-conditions weather-summary="Mostly Sunny"/>
+        <weather-conditions weather-summary="Mostly Cloudy"/>
+        <weather-conditions weather-summary="Slight Chc Rain"/>
+        <weather-conditions weather-summary="Slight Chc Rain"/>
+        <weather-conditions weather-summary="Slight Chc Rain"/>
+    </weather>
+
+    <conditions-icon type="forecast-NWS" time-layout="k-p12h-n14-1">
+      <name>Conditions Icon</name>        <icon-link>http://forecast.weather.gov/images/wtf/nfg.jpg</icon-link>
+        <icon-link>http://forecast.weather.gov/images/wtf/sctfg.jpg</icon-link>
+        <icon-link>http://forecast.weather.gov/images/wtf/nfew.jpg</icon-link>
+        <icon-link>http://forecast.weather.gov/images/wtf/few.jpg</icon-link>
+        <icon-link>http://forecast.weather.gov/images/wtf/nsct.jpg</icon-link>
+        <icon-link>http://forecast.weather.gov/images/wtf/sct.jpg</icon-link>
+        <icon-link>http://forecast.weather.gov/images/wtf/nsct.jpg</icon-link>
+        <icon-link>http://forecast.weather.gov/images/wtf/sct.jpg</icon-link>
+        <icon-link>http://forecast.weather.gov/images/wtf/nsct.jpg</icon-link>
+        <icon-link>http://forecast.weather.gov/images/wtf/sct.jpg</icon-link>
+        <icon-link>http://forecast.weather.gov/images/wtf/nbkn.jpg</icon-link>
+        <icon-link>http://forecast.weather.gov/images/wtf/ra.jpg</icon-link>
+        <icon-link>http://forecast.weather.gov/images/wtf/nra.jpg</icon-link>
+        <icon-link>http://forecast.weather.gov/images/wtf/ra.jpg</icon-link>
+    </conditions-icon>
+
+    <wordedForecast time-layout="k-p12h-n14-1" dataSource="mtrNetcdf" wordGenerator="markMitchell">
+      <name>Text Forecast</name>
+        <text>Patchy fog. Otherwise, mostly cloudy, with a low around 9. Northwest wind around 10 km/h becoming calm. </text>
+        <text>Patchy fog before 10am. Otherwise, mostly sunny, with a high near 16. North northeast wind between 10 and 13 km/h becoming calm. </text>
+        <text>Mostly clear, with a low around 9. Calm wind becoming northeast between 11 and 14 km/h. </text>
+        <text>Sunny, with a high near 17. East northeast wind between 14 and 18 km/h. </text>
+        <text>Partly cloudy, with a low around 10. East northeast wind between 8 and 11 km/h. </text>
+        <text>Mostly sunny, with a high near 17.  </text>
+        <text>Partly cloudy, with a low around 9.  </text>
+        <text>Mostly sunny, with a high near 18.  </text>
+        <text>Partly cloudy, with a low around 10.  </text>
+        <text>Mostly sunny, with a high near 16.  </text>
+        <text>Mostly cloudy, with a low around 9.  </text>
+        <text>A slight chance of rain.  Mostly cloudy, with a high near 16.  </text>
+        <text>A slight chance of rain.  Mostly cloudy, with a low around 8.  </text>
+        <text>A slight chance of rain.  Mostly cloudy, with a high near 16.  </text>
+    </wordedForecast>
+
+</parameters>
+</data>
+<data type="current observations">
+	<location>
+		<location-key>point1</location-key>
+		<point latitude="" longitude=""/>
+		<area-description>NA, </area-description>
+		<height datum="mean sea level" height-units="feet"></height>
+	</location>
+	<moreWeatherInformation applicable-location="point1">http://www.nws.noaa.gov/data/obhistory/SFOC1.html</moreWeatherInformation>	<time-layout time-coordinate="local">	<layout-key>k-p1h-n1-1</layout-key>	<start-valid-time period-name="current">T-00:00</start-valid-time>	</time-layout>	<parameters applicable-location="point1">		<temperature type="apparent" units="Fahrenheit" time-layout="k-p1h-n1-1">			<value>0</value>		</temperature>		<temperature type="dew point" units="Fahrenheit" time-layout="k-p1h-n1-1">			<value>0</value>		</temperature>		<humidity type="relative" time-layout="k-p1h-n1-1">			<value>0</value>		</humidity>		<weather time-layout="k-p1h-n1-1">			<name>Weather Type, Coverage, Intensity</name>			<weather-conditions weather-summary=""/>			<weather-conditions>				<value>					<visibility units="statute miles">NA</visibility>				</value>			</weather-conditions>		</weather>		<conditions-icon type="forecast-NWS" time-layout="k-p1h-n1-1">			<name>Conditions Icon</name>			<icon-link>http://forecast.weather.gov/images/wtf/NULL</icon-link>		</conditions-icon>		<direction type="wind" units="degrees true" time-layout="k-p1h-n1-1">			<value>NA</value>		</direction>		<pressure type="barometer" units="inches of mercury" time-layout="k-p1h-n1-1">			<value>NA</value>		</pressure>		<wind-speed type="gust" units="knots" time-layout="k-p1h-n1-1">			<value>NA</value>		</wind-speed>		<wind-speed type="sustained" units="knots" time-layout="k-p1h-n1-1">			<value>NA</value>		</wind-speed>	</parameters></data>
+</dwml>

@@ -62,6 +62,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Refresh", "2")
 
 	now := Pacify(time.UTC())
+
 	sunrise := Pacify(solar.Rise(now, Lat, Lng))
 	sunset := Pacify(solar.Set(now, Lat, Lng))
 	sun1 := "sunrise: " + sunrise.Format("3:04&thinsp;pm")
