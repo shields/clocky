@@ -1,113 +1,15 @@
 package clocky
 
 import (
-	"fmt"
 	"http"
-	"io"
-	"os"
-	"strconv"
-	"strings"
 	"template"
-	"time"
-	"xml"
 
 	"appengine"
-	"appengine/memcache"
-
-	"solar"
 )
 
 const Lat, Lng = 37.79, -122.42
 
 var tmpl = template.Must(template.New("page").Parse(page))
-
-// Weekday calculates the day of a week using Sakamoto's method.
-func Weekday(t *time.Time) int {
-	data := []int{0, 0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4}
-	y := int(t.Year) // This algorithm won't work for years >= 2**31 anyway.
-	if t.Month < 3 {
-		y--
-	}
-	return (y + y/4 - y/100 + y/400 + data[t.Month] + t.Day) % 7
-}
-
-// Pacify converts utc to US Pacific time (2007 rules).  We have to do
-// this by hand because Go r60 doesn't have any real time zone
-// support.  Things are better in Go 1.
-func Pacify(utc *time.Time) *time.Time {
-	// Find the second Sunday in March and the first Sunday in
-	// November.  The second Sunday in March is the first Sunday
-	// that is or follows March 8.
-	mar8, _ := time.Parse("2006-01-02 15", fmt.Sprintf("%d-03-08 10", utc.Year))
-	dstStart := mar8.Seconds() + int64((7-Weekday(mar8))%7*86400)
-	nov1, _ := time.Parse("2006-01-02 15", fmt.Sprintf("%d-11-01 09", utc.Year))
-	dstEnd := nov1.Seconds() + int64((7-Weekday(nov1))%7*86400)
-
-	offset, zone := -8*3600, "PST"
-	if utc.Seconds() >= dstStart && utc.Seconds() < dstEnd {
-		offset, zone = -7*3600, "PDT"
-	}
-	local := time.SecondsToUTC(utc.Seconds() + int64(offset))
-	local.ZoneOffset = offset
-	local.Zone = zone
-	return local
-}
-
-func Time(c appengine.Context) map[string]string {
-	now := Pacify(time.UTC())
-	sunrise := Pacify(solar.Rise(now, Lat, Lng))
-	sunset := Pacify(solar.Set(now, Lat, Lng))
-	sun1 := "sunrise " + sunrise.Format("3:04&thinsp;pm")
-	sun2 := "sunset " + sunset.Format("3:04&thinsp;pm")
-	if sunrise.Seconds() > sunset.Seconds() {
-		sun1, sun2 = sun2, sun1
-	}
-	return map[string]string{
-		"Big":   now.Format("3:04"),
-		"Small": now.Format(":05&thinsp;pm"),
-		"Date":  now.Format("Monday, January 2"),
-		"Sun1":  sun1,
-		"Sun2":  sun2,
-	}
-}
-
-func Conditions(c appengine.Context) map[string]string {
-	item, err := memcache.Get(c, "conditions")
-	if err != nil {
-		c.Errorf("%q", err)
-		return nil
-	}
-	cond := struct {
-		Temp_c      string
-		WindChill_c string
-		Wind_Mph    string
-	}{}
-
-	// NWS serves XML in ISO-8859-1 for no reason; the data is really ASCII.
-	p := xml.NewParser(strings.NewReader(string(item.Value)))
-	p.CharsetReader = func(charset string, input io.Reader) (io.Reader, os.Error) {
-		return input, nil
-	}
-	if err = p.Unmarshal(&cond, nil); err != nil {
-		c.Errorf("%q", err)
-		return nil
-	}
-
-	result := make(map[string]string)
-	if cond.Temp_c != "" {
-		result["Temp"] = cond.Temp_c + "°"
-	}
-	if cond.WindChill_c != "" {
-		result["WindChill"] = "wind chill " + cond.WindChill_c + "°"
-	}
-	if cond.Wind_Mph != "" {
-		mph, err := strconv.Atof64(cond.Wind_Mph)
-		if err == nil {
-			result["Wind"] = fmt.Sprintf("wind %d&thinsp;km/h", int(mph*1.609344))
-		}
-	}
-	return result
-}
 
 func handler(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" && r.URL.Path != "/_ah/warmup" {
