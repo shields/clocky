@@ -4,6 +4,7 @@ import (
 	"http"
 	"io"
 	"io/ioutil"
+	"os"
 
 	"appengine"
 	"appengine/memcache"
@@ -12,19 +13,17 @@ import (
 
 const WeatherURL = "http://forecast.weather.gov/MapClick.php?lat=37.79570&lon=-122.42100&FcstType=dwml&unit=1"
 
-func fetchWeather(w http.ResponseWriter, r *http.Request) {
+func fetchWeather(r *http.Request) os.Error {
 	c := appengine.NewContext(r)
 
 	client := urlfetch.Client(c)
 	resp, err := client.Get(WeatherURL)
 	if err != nil {
-		http.Error(w, err.String(), http.StatusInternalServerError)
-		return
+		return err
 	}
 	contents, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		http.Error(w, err.String(), http.StatusInternalServerError)
-		return
+		return err
 	}
 	resp.Body.Close()
 
@@ -34,13 +33,21 @@ func fetchWeather(w http.ResponseWriter, r *http.Request) {
 		Expiration: 4 * 3600,
 	}
 	if err := memcache.Set(c, item); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func fetchWeatherHandler(w http.ResponseWriter, r *http.Request) {
+	if err := fetchWeather(r); err != nil {
 		http.Error(w, err.String(), http.StatusInternalServerError)
 		return
 	}
-
 	io.WriteString(w, "ok\n")
 }
 
 func init() {
-	http.HandleFunc("/fetch/weather", fetchWeather)
+	http.HandleFunc("/fetch/weather", fetchWeatherHandler)
+	http.HandleFunc("/ah/_warmup", fetchWeatherHandler)
 }
