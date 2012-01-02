@@ -48,6 +48,14 @@ func weekday(t *time.Time) int {
 	return (y + y/4 - y/100 + y/400 + sakamotoTable[t.Month] + t.Day) % 7
 }
 
+func sunFormat(now, t *time.Time) (s string) {
+	s = t.Format("3:04&thinsp;pm")
+	if now.Day != t.Day {
+		s += " tomorrow"
+	}
+	return s
+}
+
 func handler(w http.ResponseWriter, r *http.Request) {
 	// TODO: Refresh minutely; use JS to fake things.
 	// TODO: Have browser refresh; safer since error pages will get retried.
@@ -56,14 +64,19 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	now := Pacify(time.UTC())
 	sunrise := Pacify(solar.Rise(now, Lat, Lng))
 	sunset := Pacify(solar.Set(now, Lat, Lng))
+	sun1 := "sunrise: " + sunrise.Format("3:04&thinsp;pm")
+	sun2 := "sunset: " + sunset.Format("3:04&thinsp;pm")
+	if sunrise.Seconds() > sunset.Seconds() {
+		sun1, sun2 = sun2, sun1
+	}
 
 	d := map[string]map[string]string{
 		"Time": map[string]string{
-			"Big":     now.Format("3:04"),
-			"Small":   now.Format(":05&thinsp;pm"),
-			"Date":    now.Format("Sunday, January 2"),
-			"Sunrise": sunrise.Format("3:04&thinsp;pm"),
-			"Sunset":  sunset.Format("3:04&thinsp;pm"),
+			"Big":   now.Format("3:04"),
+			"Small": now.Format(":05&thinsp;pm"),
+			"Date":  now.Format("Sunday, January 2"),
+			"Sun1":  sun1,
+			"Sun2":  sun2,
 		},
 		"Weather": map[string]string{
 			"Temp":     "12°",
@@ -97,7 +110,7 @@ const page = `<!DOCTYPE html>
 <div class=box style="width: 350px; height: 130px; top: 18px; left:24px; text-align: center; background-color: #eee">
     <div class=header><span class=larger>{{.Big}}</span>{{.Small}}</div>
     <div class=smaller>{{.Date}}</div>
-    <div class=smaller>sunrise {{.Sunrise}}; sunset {{.Sunset}}</div>
+    <div class=smaller>{{.Sun1}}; {{.Sun2}}</div>
 </div>
 {{end}}
 
