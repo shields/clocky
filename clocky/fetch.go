@@ -34,9 +34,17 @@ var Sources = []*Source{
 		Expiration: 300,
 	},
 	&Source{
-		Key: "weather",
+		Key: "forecast",
 		URL: ("http://forecast.weather.gov/MapClick.php?" +
 			"lat=37.79570&lon=-122.42100&FcstType=dwml&unit=1"),
+		// http://graphical.weather.gov/xml/mdl/XML/Design/WebServicesUseGuildlines.php
+		Refresh:    3600,
+		Expiration: 8 * 3600,
+	},
+	// A buoy off Pier 1.
+	&Source{
+		Key: "conditions",
+		URL: "http://www.weather.gov/xml/current_obs/display.php?stid=PXOC1",
 		// http://graphical.weather.gov/xml/mdl/XML/Design/WebServicesUseGuildlines.php
 		Refresh:    3600,
 		Expiration: 4 * 3600,

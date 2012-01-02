@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="ISO-8859-1"?> 
+<?xml-stylesheet href="latest_ob.xsl" type="text/xsl"?>
+<current_observation version="1.0"
+	 xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	 xsi:noNamespaceSchemaLocation="http://www.weather.gov/view/current_observation.xsd">
+	<credit>NOAA's National Weather Service</credit>
+	<credit_URL>http://weather.gov/</credit_URL>
+	<image>
+		<url>http://weather.gov/images/xml_logo.gif</url>
+		<title>NOAA's National Weather Service</title>
+		<link>http://weather.gov</link>
+	</image>
+	<suggested_pickup>15 minutes after the hour</suggested_pickup>
+	<suggested_pickup_period>60</suggested_pickup_period>
+	<location>Unknown Station</location>
+	<station_id>PXOC1</station_id>
+	<observation_time>Last Updated on Jan 2 2012, 1:48 pm CST</observation_time>
+        <observation_time_rfc822>Mon, 02 Jan 2012 13:48:00 -0600</observation_time_rfc822>
+	<temperature_string>50.7 F (10.4 C)</temperature_string>
+	<temp_f>50.7</temp_f>
+	<temp_c>10.4</temp_c>
+	<wind_string>Northeast at 2.2 MPH (1.94 KT)</wind_string>
+	<wind_dir>Northeast</wind_dir>
+	<wind_degrees>50</wind_degrees>
+	<wind_mph>2.2</wind_mph>
+	<wind_gust_mph>0.0</wind_gust_mph>
+	<wind_kt>1.94</wind_kt>
+	<pressure_string>1025.0 mb</pressure_string>
+	<pressure_mb>1025.0</pressure_mb>
+	<mean_wave_dir>East</mean_wave_dir>
+	<mean_wave_degrees></mean_wave_degrees>
+	<disclaimer_url>http://weather.gov/disclaimer.html</disclaimer_url>
+	<copyright_url>http://weather.gov/disclaimer.html</copyright_url>
+	<privacy_policy_url>http://weather.gov/notice.html</privacy_policy_url>
+</current_observation>
