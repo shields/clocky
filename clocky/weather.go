@@ -31,8 +31,8 @@ func Conditions(w io.Writer, c appengine.Context) {
 	}
 
 	data := struct {
-		Temp_c      []byte
-		WindChill_c []byte
+		Temp_c      string
+		WindChill_c string
 		Wind_Mph    string
 	}{}
 	p := newParser(item.Value)
@@ -44,17 +44,21 @@ func Conditions(w io.Writer, c appengine.Context) {
 	io.WriteString(w, `<div class=header>`)
 	if len(data.Temp_c) != 0 {
 		io.WriteString(w, `<span class=larger>`)
-		template.HTMLEscape(w, data.Temp_c)
+		template.HTMLEscape(w, []byte(data.Temp_c))
 		io.WriteString(w, `°</span> `)
 	}
 	if len(data.WindChill_c) != 0 {
 		io.WriteString(w, `wind chill `)
-		template.HTMLEscape(w, data.WindChill_c)
+		template.HTMLEscape(w, []byte(data.WindChill_c))
 		io.WriteString(w, `°`)
 	} else if data.Wind_Mph != "" {
 		mph, err := strconv.Atof64(data.Wind_Mph)
 		if err == nil {
-			fmt.Fprintf(w, "wind %d&thinsp;km/h", int(mph*1.609344))
+			if mph == 0 {
+				io.WriteString(w, "wind calm")
+			} else {
+				fmt.Fprintf(w, "wind %d&thinsp;km/h", int(mph*1.609344))
+			}
 		}
 	}
 	io.WriteString(w, `</div>`)
