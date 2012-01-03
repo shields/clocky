@@ -29,7 +29,7 @@ var Sources = []*Source{
 			"&stops=12|null|5859" +
 			"&stops=1|null|4016" +
 			"&stops=1|null|6297" +
-			"&stops=27|null|35165"),
+			"&stops=27|null|5165"),
 		Refresh:    10,
 		Expiration: 300,
 	},
@@ -41,10 +41,10 @@ var Sources = []*Source{
 		Refresh:    3600,
 		Expiration: 8 * 3600,
 	},
-	// A buoy off Pier 1.
+	// A buoy near Crissy Field.
 	&Source{
 		Key: "conditions",
-		URL: "http://www.weather.gov/xml/current_obs/display.php?stid=PXOC1",
+		URL: "http://www.weather.gov/xml/current_obs/display.php?stid=FTPC1",
 		// http://graphical.weather.gov/xml/mdl/XML/Design/WebServicesUseGuildlines.php
 		Refresh:    3600,
 		Expiration: 4 * 3600,
