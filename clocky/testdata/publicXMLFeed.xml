@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8" ?> 
+<body copyright="All data copyright San Francisco Muni 2012.">
+<predictions agencyTitle="San Francisco Muni" routeTitle="1-California" routeTag="1" stopTitle="Clay St &amp; Franklin St" stopTag="4016">
+  <direction title="Inbound to Downtown">
+  <prediction epochTime="1325547656538" seconds="261" minutes="4" isDeparture="false" dirTag="01_IB05" vehicle="5585" block="0108" tripTag="4745696" />
+  <prediction epochTime="1325547735077" seconds="339" minutes="5" isDeparture="false" dirTag="01_IB06" vehicle="5487" block="0123" tripTag="4745673" />
+  <prediction epochTime="1325548202190" seconds="806" minutes="13" isDeparture="false" affectedByLayover="true" dirTag="01_IB06" vehicle="5609" block="0113" tripTag="4745674" />
+  <prediction epochTime="1325548331505" seconds="936" minutes="15" isDeparture="false" dirTag="01_IB05" vehicle="5623" block="0109" tripTag="4745698" />
+  <prediction epochTime="1325548622190" seconds="1226" minutes="20" isDeparture="false" affectedByLayover="true" dirTag="01_IB06" vehicle="5520" block="0151" tripTag="4745675" />
+  </direction>
+<message text="PROOF OF PAYMENT&#10;is required when&#10;on a Muni vehicle&#10;or in a station."/>
+<message text="sfmta.com or 3 1 1&#10;for Muni info"/>
+</predictions>
+<predictions agencyTitle="San Francisco Muni" routeTitle="1-California" routeTag="1" stopTitle="Sacramento St &amp; Franklin St" stopTag="6297">
+  <direction title="Outbound to the Richmond District">
+  <prediction epochTime="1325547495552" seconds="100" minutes="1" isDeparture="false" dirTag="01_OB09" vehicle="5570" block="0105" tripTag="4745622" />
+  <prediction epochTime="1325548014179" seconds="618" minutes="10" isDeparture="false" dirTag="01_OB09" vehicle="5607" block="0102" tripTag="4745624" />
+  <prediction epochTime="1325548266411" seconds="870" minutes="14" isDeparture="false" dirTag="01_OB09" vehicle="5581" block="0124" tripTag="4745625" />
+  <prediction epochTime="1325548854498" seconds="1459" minutes="24" isDeparture="false" affectedByLayover="true" dirTag="01_OB09" vehicle="5603" block="0101" tripTag="4745627" />
+  <prediction epochTime="1325549114797" seconds="1719" minutes="28" isDeparture="false" affectedByLayover="true" dirTag="01_OB09" vehicle="5525" block="0121" tripTag="4745458" />
+  </direction>
+  <direction title="Outbound to California &amp; Presidio">
+  <prediction epochTime="1325547696827" seconds="301" minutes="5" isDeparture="false" dirTag="01_OB04" vehicle="5631" block="0106" tripTag="4745623" />
+  <prediction epochTime="1325549375901" seconds="1980" minutes="33" isDeparture="false" affectedByLayover="true" dirTag="01_OB04" vehicle="5541" block="0107" tripTag="4745459" />
+  <prediction epochTime="1325549810754" seconds="2415" minutes="40" isDeparture="false" affectedByLayover="true" dirTag="01_OB04" vehicle="5585" block="0108" tripTag="4745460" />
+  <prediction epochTime="1325550655947" seconds="3260" minutes="54" isDeparture="false" affectedByLayover="true" dirTag="01_OB04" vehicle="5623" block="0109" tripTag="4745581" />
+  <prediction epochTime="1325551075947" seconds="3680" minutes="61" isDeparture="false" affectedByLayover="true" dirTag="01_OB04" vehicle="5540" block="0110" tripTag="4745582" />
+  </direction>
+<message text="PROOF OF PAYMENT&#10;is required when&#10;on a Muni vehicle&#10;or in a station."/>
+<message text="sfmta.com or 3 1 1&#10;for Muni info"/>
+</predictions>
+<predictions agencyTitle="San Francisco Muni" routeTitle="10-Townsend" routeTag="10" stopTitle="Pacific Ave &amp; Van Ness Ave" stopTag="5859">
+  <direction title="Outbound to General Hospital">
+  <prediction epochTime="1325547441100" seconds="45" minutes="0" isDeparture="false" dirTag="10_OB1" vehicle="8203" block="1005" tripTag="4753756" />
+  <prediction epochTime="1325548644295" seconds="1248" minutes="20" isDeparture="false" affectedByLayover="true" dirTag="10_OB1" vehicle="8020" block="1002" tripTag="4753758" />
+  <prediction epochTime="1325549873924" seconds="2478" minutes="41" isDeparture="false" affectedByLayover="true" dirTag="10_OB1" vehicle="8336" block="1003" tripTag="4753760" />
+  <prediction epochTime="1325551073924" seconds="3678" minutes="61" isDeparture="false" affectedByLayover="true" dirTag="10_OB1" vehicle="8035" block="1004" tripTag="4753762" />
+  <prediction epochTime="1325552273924" seconds="4878" minutes="81" isDeparture="false" affectedByLayover="true" dirTag="10_OB1" vehicle="8344" block="1006" tripTag="4753764" />
+  </direction>
+<message text="PROOF OF PAYMENT&#10;is required when&#10;on a Muni vehicle&#10;or in a station."/>
+<message text="sfmta.com or 3 1 1&#10;for Muni info"/>
+</predictions>
+<predictions agencyTitle="San Francisco Muni" routeTitle="12-Folsom/Pacific" routeTag="12" stopTitle="Pacific Ave &amp; Van Ness Ave" stopTag="5859">
+  <direction title="Outbound to the Mission District">
+  <prediction epochTime="1325548080000" seconds="684" minutes="11" isDeparture="true" affectedByLayover="true" dirTag="12_OB1" vehicle="8326" block="1206" tripTag="4753755" />
+  <prediction epochTime="1325549280000" seconds="1884" minutes="31" isDeparture="true" affectedByLayover="true" dirTag="12_OB1" vehicle="8018" block="1201" tripTag="4753757" />
+  <prediction epochTime="1325550480000" seconds="3084" minutes="51" isDeparture="true" affectedByLayover="true" dirTag="12_OB1" vehicle="8030" block="1202" tripTag="4753759" />
+  <prediction epochTime="1325551680000" seconds="4284" minutes="71" isDeparture="true" affectedByLayover="true" dirTag="12_OB1" vehicle="8008" block="1203" tripTag="4753761" />
+  </direction>
+<message text="PROOF OF PAYMENT&#10;is required when&#10;on a Muni vehicle&#10;or in a station."/>
+<message text="sfmta.com or 3 1 1&#10;for Muni info"/>
+</predictions>
+<predictions agencyTitle="San Francisco Muni" routeTitle="27-Bryant" routeTag="27" stopTitle="Jackson St &amp; Van Ness Ave" stopTag="35165">
+  <direction title="Inbound to Jackson &amp; Van Ness">
+  <prediction epochTime="1325547443980" seconds="48" minutes="0" isDeparture="false" dirTag="27_IB1" vehicle="8406" block="2701" tripTag="4759715" />
+  <prediction epochTime="1325548321029" seconds="925" minutes="15" isDeparture="false" dirTag="27_IB1" vehicle="8371" block="2706" tripTag="4759716" />
+  <prediction epochTime="1325549329279" seconds="1933" minutes="32" isDeparture="false" dirTag="27_IB1" vehicle="8422" block="2703" tripTag="4759717" />
+  <prediction epochTime="1325550279867" seconds="2884" minutes="48" isDeparture="false" affectedByLayover="true" dirTag="27_IB1" vehicle="8175" block="2704" tripTag="4759718" />
+  <prediction epochTime="1325551140128" seconds="3744" minutes="62" isDeparture="false" affectedByLayover="true" dirTag="27_IB1" vehicle="8453" block="2707" tripTag="4759719" />
+  </direction>
+<message text="PROOF OF PAYMENT&#10;is required when&#10;on a Muni vehicle&#10;or in a station."/>
+<message text="sfmta.com or 3 1 1&#10;for Muni info"/>
+</predictions>
+<predictions agencyTitle="San Francisco Muni" routeTitle="47-Van Ness" routeTag="47" stopTitle="Van Ness Ave &amp; Pacific Ave" stopTag="6825">
+  <direction title="Outbound to Caltrain">
+  <prediction epochTime="1325547559418" seconds="163" minutes="2" isDeparture="false" dirTag="47_OB" vehicle="8229" block="4712" tripTag="4769437" />
+  <prediction epochTime="1325548193199" seconds="797" minutes="13" isDeparture="false" affectedByLayover="true" dirTag="47_OB" vehicle="8307" block="4708" tripTag="4769438" />
+  <prediction epochTime="1325548731199" seconds="1335" minutes="22" isDeparture="false" affectedByLayover="true" dirTag="47_OB" vehicle="8329" block="4703" tripTag="4769439" />
+  <prediction epochTime="1325549371396" seconds="1975" minutes="32" isDeparture="false" affectedByLayover="true" dirTag="47_OB" vehicle="8226" block="4704" tripTag="4769440" />
+  <prediction epochTime="1325549958529" seconds="2563" minutes="42" isDeparture="false" affectedByLayover="true" dirTag="47_OB" vehicle="8302" block="4706" tripTag="4769441" />
+  </direction>
+<message text="PROOF OF PAYMENT&#10;is required when&#10;on a Muni vehicle&#10;or in a station."/>
+<message text="sfmta.com or 3 1 1&#10;for Muni info"/>
+</predictions>
+<predictions agencyTitle="San Francisco Muni" routeTitle="49-Mission-Van Ness" routeTag="49" stopTitle="Van Ness Ave &amp; Pacific Ave" stopTag="6825">
+  <direction title="Outbound to City College">
+  <prediction epochTime="1325547395780" seconds="0" minutes="0" isDeparture="false" dirTag="49_OB2" vehicle="5414" block="4915" tripTag="4770477" />
+  <prediction epochTime="1325547927283" seconds="531" minutes="8" isDeparture="false" affectedByLayover="true" dirTag="49_OB2" vehicle="7051" block="4951" tripTag="4770476" />
+  <prediction epochTime="1325548407283" seconds="1011" minutes="16" isDeparture="false" affectedByLayover="true" dirTag="49_OB2" vehicle="7107" block="4912" tripTag="4770475" />
+  <prediction epochTime="1325548905736" seconds="1510" minutes="25" isDeparture="false" affectedByLayover="true" dirTag="49_OB2" vehicle="7012" block="4901" tripTag="4770474" />
+  <prediction epochTime="1325549714763" seconds="2319" minutes="38" isDeparture="false" affectedByLayover="true" dirTag="49_OB2" vehicle="5442" block="4903" tripTag="4770472" />
+  </direction>
+<message text="PROOF OF PAYMENT&#10;is required when&#10;on a Muni vehicle&#10;or in a station."/>
+<message text="sfmta.com or 3 1 1&#10;for Muni info"/>
+</predictions>
+</body>
