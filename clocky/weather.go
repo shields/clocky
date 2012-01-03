@@ -82,7 +82,7 @@ func Forecast(w io.Writer, c appengine.Context) {
 			TimeLayout []struct {
 				LayoutKey      string `xml:"layout-key"`
 				StartValidTime []struct {
-					PeriodName []byte `xml:"attr"`
+					PeriodName string `xml:"attr"`
 				}
 			}
 			Parameters struct {
@@ -104,13 +104,17 @@ func Forecast(w io.Writer, c appengine.Context) {
 		if d.Type != "forecast" {
 			continue
 		}
-		var periods [][]byte
+		var periods []string
 		for _, tl := range d.TimeLayout {
 			if tl.LayoutKey != d.Parameters.WordedForecast.TimeLayout {
 				continue
 			}
 			for _, svt := range tl.StartValidTime {
-				periods = append(periods, svt.PeriodName)
+				pn := svt.PeriodName
+				pn = strings.Replace(pn, " Morning", " morning", -1)
+				pn = strings.Replace(pn, " Afternoon", " afternoon", -1)
+				pn = strings.Replace(pn, " Night", " night", -1)
+				periods = append(periods, pn)
 			}
 		}
 		texts := d.Parameters.WordedForecast.Text
@@ -124,7 +128,7 @@ func Forecast(w io.Writer, c appengine.Context) {
 		}
 		for i, text := range texts {
 			io.WriteString(w, `<div style="margin-bottom: 8px"><span class=header>`)
-			template.HTMLEscape(w, periods[i])
+			template.HTMLEscape(w, []byte(periods[i]))
 			io.WriteString(w, `:</span> `)
 
 			spaceSubs := make(map[int]string)
