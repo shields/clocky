@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"appengine"
@@ -57,12 +58,18 @@ var Sources = []*Source{
 func (s Source) Fetch(c appengine.Context) os.Error {
 	c.Debugf("fetching %s data", s.Key)
 
-	client := urlfetch.Client(c)
-	resp, err := client.Get(s.URL)
+	transport := urlfetch.Transport{Context: c, DeadlineSeconds: 60}
+	req, err := http.NewRequest("GET", s.URL, strings.NewReader(""))
 	if err != nil {
 		c.Errorf("%q", err)
 		return err
 	}
+	resp, err := transport.RoundTrip(req)
+	if err != nil {
+		c.Errorf("%q", err)
+		return err
+	}
+
 	contents, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		c.Errorf("%q", err)
