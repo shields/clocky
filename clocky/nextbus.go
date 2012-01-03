@@ -29,6 +29,11 @@ func (p prediction) ToString() string {
 	return result
 }
 
+var BoringMuniMessages = map[string]bool{
+	"PROOF OF PAYMENT\nis required when\non a Muni vehicle\nor in a station.": true,
+	"sfmta.com or 3 1 1\nfor Muni info":                                       true,
+}
+
 func NextBus(w io.Writer, c appengine.Context) {
 	item, err := memcache.Get(c, "nextbus")
 	if err != nil {
@@ -59,7 +64,7 @@ func NextBus(w io.Writer, c appengine.Context) {
 			template.HTMLEscape(w, []byte(p.RouteTag))
 			io.WriteString(w, ` <span class=smaller>`)
 			template.HTMLEscape(w, []byte(d.Title))
-			io.WriteString(w, `</span></div><div class=arrivals>`)
+			io.WriteString(w, `</span></div><div>`)
 			for i, pp := range d.Prediction {
 				if pp.IsDeparture && i == 0 {
 					io.WriteString(w, "departs ")
@@ -68,14 +73,22 @@ func NextBus(w io.Writer, c appengine.Context) {
 				io.WriteString(w, s)
 				if i == len(d.Prediction)-1 {
 					if s == "1" {
-						io.WriteString(w, " minute")
+						io.WriteString(w, ` minute`)
 					} else {
-						io.WriteString(w, " minutes")
+						io.WriteString(w, ` minutes`)
 					}
 				} else {
-					io.WriteString(w, ", ")
+					io.WriteString(w, `, `)
 				}
 			}
+			io.WriteString(w, `</div>`)
+		}
+		for _, m := range p.Message {
+			if BoringMuniMessages[m.Text] {
+				continue
+			}
+			io.WriteString(w, `<div class=munimessage>`)
+			template.HTMLEscape(w, []byte(m.Text))
 			io.WriteString(w, `</div>`)
 		}
 	}

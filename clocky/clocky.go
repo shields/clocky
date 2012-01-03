@@ -38,7 +38,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	Forecast(w, c)
 	io.WriteString(w, `</div>`)
 
-	io.WriteString(w, `<div class=box style="width: 320px; top: 16px; left: 460px">`)
+	io.WriteString(w, `<div class=box style="width: 320px; top: 16px; left: 460px; font-size: 20px">`)
 	NextBus(w, c)
 	io.WriteString(w, `</div>`)
 }
@@ -59,7 +59,7 @@ const header = `<!DOCTYPE html>
         .box { position: absolute; }
         .bus { margin: 8px 0 8px 0; }
         .route { font-size: 24px; font-weight: bold; }
-        .arrivals { font-size: 20px; }
+        .munimessage { font-style: italic; }
     </style>
 </head>
 `
