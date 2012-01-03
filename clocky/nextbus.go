@@ -37,7 +37,7 @@ var BoringMuniMessages = map[string]bool{
 func NextBus(w io.Writer, c appengine.Context) {
 	item, err := memcache.Get(c, "nextbus")
 	if err != nil {
-		c.Errorf("%q", err)
+		c.Errorf("%s", err)
 		return
 	}
 
@@ -54,7 +54,7 @@ func NextBus(w io.Writer, c appengine.Context) {
 		}
 	}{}
 	if err := xml.Unmarshal(strings.NewReader(string(item.Value)), &data); err != nil {
-		c.Errorf("%q", err)
+		c.Errorf("%s", err)
 		return
 	}
 

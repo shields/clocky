@@ -26,7 +26,7 @@ func newParser(b []byte) (p *xml.Parser) {
 func Conditions(w io.Writer, c appengine.Context) {
 	item, err := memcache.Get(c, "conditions")
 	if err != nil {
-		c.Errorf("%q", err)
+		c.Errorf("%s", err)
 		return
 	}
 
@@ -37,7 +37,7 @@ func Conditions(w io.Writer, c appengine.Context) {
 	}{}
 	p := newParser(item.Value)
 	if err = p.Unmarshal(&data, nil); err != nil {
-		c.Errorf("%q", err)
+		c.Errorf("%s", err)
 		return
 	}
 
@@ -72,7 +72,7 @@ var (
 func Forecast(w io.Writer, c appengine.Context) {
 	item, err := memcache.Get(c, "forecast")
 	if err != nil {
-		c.Errorf("%q", err)
+		c.Errorf("%s", err)
 		return
 	}
 
@@ -95,7 +95,7 @@ func Forecast(w io.Writer, c appengine.Context) {
 	}{}
 	p := newParser(item.Value)
 	if err = p.Unmarshal(&data, nil); err != nil {
-		c.Errorf("%q", err)
+		c.Errorf("%s", err)
 		return
 	}
 

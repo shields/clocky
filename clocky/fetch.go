@@ -61,18 +61,18 @@ func (s Source) Fetch(c appengine.Context) os.Error {
 	transport := urlfetch.Transport{Context: c, DeadlineSeconds: 60}
 	req, err := http.NewRequest("GET", s.URL, strings.NewReader(""))
 	if err != nil {
-		c.Errorf("%q", err)
+		c.Errorf("%s", err)
 		return err
 	}
 	resp, err := transport.RoundTrip(req)
 	if err != nil {
-		c.Errorf("%q", err)
+		c.Errorf("%s", err)
 		return err
 	}
 
 	contents, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		c.Errorf("%q", err)
+		c.Errorf("%s", err)
 		return err
 	}
 	resp.Body.Close()
@@ -83,7 +83,7 @@ func (s Source) Fetch(c appengine.Context) os.Error {
 		Expiration: int32(s.Expiration),
 	}
 	if err := memcache.Set(c, item); err != nil {
-		c.Errorf("%q", err)
+		c.Errorf("%s", err)
 		return err
 	}
 
@@ -99,7 +99,7 @@ func (s Source) Fetch(c appengine.Context) os.Error {
 		Value: []byte(strconv.Itoa64(time.Seconds())),
 	}
 	if err := memcache.Set(c, item); err != nil {
-		c.Errorf("%q", err)
+		c.Errorf("%s", err)
 		return err
 	}
 
@@ -113,14 +113,14 @@ func (s *Source) Freshen(c appengine.Context) os.Error {
 	if err == memcache.ErrCacheMiss {
 		return s.Fetch(c)
 	} else if err != nil {
-		c.Errorf("%q", err)
+		c.Errorf("%s", err)
 		// Something is wrong with memcache, so don't try to fetch.
 		return err
 	}
 
 	fresh, err := strconv.Atoi64(string(item.Value))
 	if err != nil {
-		c.Errorf("%q", err)
+		c.Errorf("%s", err)
 		return s.Fetch(c)
 	}
 
