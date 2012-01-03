@@ -133,12 +133,16 @@ func Forecast(w io.Writer, c appengine.Context) {
 
 			spaceSubs := make(map[int]string)
 			matches := nbspRegexp.FindAllStringIndex(text, -1)
-			for i := 0; i < len(matches[0]); i += 2 {
-				spaceSubs[matches[0][i]] = "&nbsp;"
+			if len(matches) > 0 {
+				for i := 0; i < len(matches[0]); i += 2 {
+					spaceSubs[matches[0][i]] = "&nbsp;"
+				}
 			}
 			matches = thinspRegexp.FindAllStringIndex(text, -1)
-			for i := 0; i < len(matches[0]); i += 2 {
-				spaceSubs[matches[0][i]+1] = `<span style="white-space: nowrap">&thinsp;</span>`
+			if len(matches) > 0 {
+				for i := 0; i < len(matches[0]); i += 2 {
+					spaceSubs[matches[0][i]+1] = `<span style="white-space: nowrap">&thinsp;</span>`
+				}
 			}
 			for i, ch := range text {
 				sub, ok := spaceSubs[i]
