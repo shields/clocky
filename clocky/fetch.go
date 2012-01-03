@@ -1,6 +1,7 @@
 package clocky
 
 import (
+	"fmt"
 	"http"
 	"io"
 	"io/ioutil"
@@ -64,17 +65,24 @@ func (s Source) Fetch(c appengine.Context) os.Error {
 		c.Errorf("%s", err)
 		return err
 	}
+	c.Debugf("XXX created request for %s", s.Key)
 	resp, err := transport.RoundTrip(req)
 	if err != nil {
 		c.Errorf("%s", err)
 		return err
 	}
-
+	c.Debugf("XXX called transport for %s", s.Key)
+	if resp.StatusCode != http.StatusOK {
+		c.Errorf("fetch: bad status %d for %s", resp.StatusCode, s.Key)
+		return fmt.Errorf("fetch: bad status %d for %s", resp.StatusCode, s.Key)
+	}
+	c.Debugf("XXX reading body for %s", s.Key)
 	contents, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		c.Errorf("%s", err)
 		return err
 	}
+	c.Debugf("XXX closing %s", s.Key)
 	resp.Body.Close()
 
 	item := &memcache.Item{
@@ -82,6 +90,7 @@ func (s Source) Fetch(c appengine.Context) os.Error {
 		Value:      contents,
 		Expiration: int32(s.Expiration),
 	}
+	c.Debugf("XXX setting memcache for %s", s.Key)
 	if err := memcache.Set(c, item); err != nil {
 		c.Errorf("%s", err)
 		return err
