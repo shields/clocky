@@ -29,12 +29,18 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	io.WriteString(w, header)
 
+	io.WriteString(w, `<div class=box style="width: 350px; height: 128px; top: 24px; left:28px; text-align: center; background-color: #eee">`)
 	Time(w, c)
+	io.WriteString(w, `</div>`)
+
 	io.WriteString(w, `<div class=box style="width: 400px; top: 170px; left: 24px">`)
 	Conditions(w, c)
 	Forecast(w, c)
 	io.WriteString(w, `</div>`)
+
+	io.WriteString(w, `<div class=box style="width: 320px; top: 16px; left: 460px">`)
 	NextBus(w, c)
+	io.WriteString(w, `</div>`)
 }
 
 func init() {
@@ -52,7 +58,7 @@ const header = `<!DOCTYPE html>
         .larger { font-size: 164%; }
         .box { position: absolute; }
         .bus { margin: 8px 0 8px 0; }
-        .route { font-weight: bold; font-size: 24px; }
+        .route { font-size: 24px; font-weight: bold; }
         .arrivals { font-size: 20px; }
     </style>
 </head>
