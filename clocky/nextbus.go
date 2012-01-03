@@ -63,7 +63,10 @@ func NextBus(w io.Writer, c appengine.Context) {
 			io.WriteString(w, `<div class=bus><div class=route>`)
 			template.HTMLEscape(w, []byte(p.RouteTag))
 			io.WriteString(w, ` <span class=smaller>`)
-			template.HTMLEscape(w, []byte(d.Title))
+			if len(d.Title) > 0 {
+				io.WriteString(w, strings.ToLower(d.Title[0:1]))
+				template.HTMLEscape(w, []byte(d.Title[1:]))
+			}
 			io.WriteString(w, `</span></div><div>`)
 			for i, pp := range d.Prediction {
 				if pp.IsDeparture && i == 0 {
