@@ -115,10 +115,9 @@ func (s *Source) Freshen(c appengine.Context) os.Error {
 	}
 
 	stale := fresh + int64(s.Refresh)
+	c.Debugf("%s stale = %s", s.Key, time.SecondsToUTC(stale).Format(time.RFC3339))
 	if stale > time.Seconds() {
-		c.Debugf("not fetching %s until %d", s.Key, stale)
 		return nil
 	}
-	c.Debugf("%s is stale since %d", s.Key, stale)
 	return s.Fetch(c)
 }
