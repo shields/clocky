@@ -64,9 +64,7 @@ func Time(w io.Writer, c appengine.Context) {
 }
 
 var timeTmpl = template.Must(template.New("time").Parse(`
-<div class=box style="width: 350px; height: 128px; top: 24px; left:28px; text-align: center; background-color: #eee">
-    <div class=header><span class=larger>{{.Big}}</span>{{.Small}}</div>
-    <div class=smaller>{{.Date}}</div>
-    <div class=smaller>{{.Sun1}}, {{.Sun2}}</div>
-</div>
+ <div class=header><span class=larger>{{.Big}}</span>{{.Small}}</div>
+ <div class=smaller>{{.Date}}</div>
+ <div class=smaller>{{.Sun1}}, {{.Sun2}}</div>
 `))

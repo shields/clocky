@@ -1,7 +1,6 @@
 package clocky
 
 import (
-	"fmt"
 	"io"
 	"strconv"
 	"strings"
@@ -13,18 +12,13 @@ import (
 	"appengine/memcache"
 )
 
-var nextBusTmpl = template.Must(template.New("nextbus").Parse(nextBusDiv))
-
 type prediction struct {
 	EpochTime   int64 `xml:"attr"`
 	IsDeparture bool  `xml:"attr"`
 }
 
 func (p prediction) ToString() string {
-	if p.IsDeparture {
-		return Pacify(time.SecondsToUTC(p.EpochTime)).Format(TimeFormat)
-	}
-	s := p.EpochTime - time.Seconds()
+	s := p.EpochTime/1000 - time.Seconds()
 	if s < 60 {
 		return "now"
 	}
@@ -59,47 +53,30 @@ func NextBus(w io.Writer, c appengine.Context) {
 		return
 	}
 
-	result := `<div class=box style="width: 300px; top: 66px; left: 475px">`
 	for _, p := range data.Predictions {
 		for _, d := range p.Direction {
-			result += fmt.Sprintf("<div class=bus><div class=route>%s</div><div class=arrivals>",
-				template.HTMLEscapeString(p.RouteTag))
-			if len(d.Prediction) == 0 {
-				result += "Probably never"
+			io.WriteString(w, `<div class=bus><div class=route>`)
+			template.HTMLEscape(w, []byte(p.RouteTag))
+			io.WriteString(w, ` <span class=smaller>`)
+			template.HTMLEscape(w, []byte(d.Title))
+			io.WriteString(w, `</span></div><div class=arrivals>`)
+			for i, pp := range d.Prediction {
+				if pp.IsDeparture && i == 0 {
+					io.WriteString(w, "departs ")
+				}
+				s := pp.ToString()
+				io.WriteString(w, s)
+				if i == len(d.Prediction)-1 {
+					if s == "1" {
+						io.WriteString(w, " minute")
+					} else {
+						io.WriteString(w, " minutes")
+					}
+				} else {
+					io.WriteString(w, ", ")
+				}
 			}
-
+			io.WriteString(w, `</div>`)
 		}
 	}
-
-	//return map[string]string{"NextBus": fmt.Sprintf("<div class=box style='width: 300px; top: 66px; left: 475px; font-size: 12px'>%s</div>", data)}
-	io.WriteString(w, nextBusDiv)
 }
-
-const nextBusDiv = `
-<div class=box style="width: 300px; top: 16px; left: 475px">
-    <div class=bus>
-        <div class=route>47 outbound</div>
-        <div class=arrivals>11, 30, 50, 68 minutes</div>
-    </div>
-    <div class=bus>
-        <div class=route>49 outbound</div>
-        <div class=arrivals>½, 19, 39, 59 minutes</div>
-    </div>
-    <div class=bus>
-        <div class=route>10, 12 outbound</div>
-        <div class=arrivals>18 minutes</div>
-    </div>
-    <div class=bus>
-        <div class=route>27 outbound</div>
-        <div class=arrivals>Probably never</div>
-    </div>
-    <div class=bus>
-        <div class=route>1 inbound</div>
-        <div class=arrivals>6½, 31, 51, 69 minutes</div>
-    </div>
-    <div class=bus>
-        <div class=route>1 outbound</div>
-        <div class=arrivals>now, 41, 59, 79 minutes</div>
-    </div>
-</div>
-`

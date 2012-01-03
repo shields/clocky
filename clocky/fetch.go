@@ -23,13 +23,13 @@ var Sources = []*Source{
 		// http://www.sfmta.com/cms/asite/nextmunidata.htm
 		URL: ("http://webservices.nextbus.com/service/publicXMLFeed?" +
 			"command=predictionsForMultiStops&a=sf-muni" +
-			"&stops=1|null|4016" +
-			"&stop=1|null|6297" +
+			"&stops=47|null|6825" +
+			"&stops=49|null|6825" +
 			"&stops=10|null|5859" +
 			"&stops=12|null|5859" +
-			"&stops=27|null|35165" +
-			"&stops=47|null|6825" +
-			"&stops=49|null|6825"),
+			"&stops=1|null|4016" +
+			"&stops=1|null|6297" +
+			"&stops=27|null|35165"),
 		Refresh:    10,
 		Expiration: 300,
 	},
