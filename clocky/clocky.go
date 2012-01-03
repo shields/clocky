@@ -10,7 +10,7 @@ import (
 const Lat, Lng = 37.79, -122.42
 
 func handler(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/" && r.URL.Path != "/_ah/warmup" {
+	if r.URL.Path != "/" {
 		http.Error(w, "Not found", http.StatusNotFound)
 		return
 	}

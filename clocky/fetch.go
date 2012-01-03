@@ -1,6 +1,8 @@
 package clocky
 
 import (
+	"http"
+	"io"
 	"io/ioutil"
 	"os"
 	"strconv"
@@ -121,4 +123,23 @@ func (s *Source) Freshen(c appengine.Context) os.Error {
 		return nil
 	}
 	return s.Fetch(c)
+}
+
+func warmup(w http.ResponseWriter, r *http.Request) {
+	c := appengine.NewContext(r)
+	ch := make(chan os.Error)
+	for _, s := range Sources {
+		go func(s *Source) { ch <- s.Freshen(c) }(s)
+	}
+	for _ = range Sources {
+		if err := <-ch; err != nil {
+			http.Error(w, err.String(), http.StatusInternalServerError)
+			return
+		}
+	}
+	io.WriteString(w, "ok\n")
+}
+
+func init() {
+	http.HandleFunc("/_ah/warmup", warmup)
 }
