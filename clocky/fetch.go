@@ -25,6 +25,7 @@ var Sources = []*Source{
 			"command=predictionsForMultiStops&a=sf-muni" +
 			"&stops=47|null|6825" +
 			"&stops=49|null|6825" +
+			"&stops=90|null|6825" +
 			"&stops=10|null|5859" +
 			"&stops=12|null|5859" +
 			"&stops=1|null|4016" +
