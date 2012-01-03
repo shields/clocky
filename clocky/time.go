@@ -2,12 +2,16 @@ package clocky
 
 import (
 	"fmt"
+	"io"
+	"template"
 	"time"
 
 	"appengine"
 
 	"solar"
 )
+
+const TimeFormat = "3:04&thinsp;pm"
 
 // Weekday calculates the day of a week using Sakamoto's method.
 func Weekday(t *time.Time) int {
@@ -41,20 +45,28 @@ func Pacify(utc *time.Time) *time.Time {
 	return local
 }
 
-func Time(c appengine.Context) map[string]string {
+func Time(w io.Writer, c appengine.Context) {
 	now := Pacify(time.UTC())
 	sunrise := Pacify(solar.Rise(now, Lat, Lng))
 	sunset := Pacify(solar.Set(now, Lat, Lng))
-	sun1 := "sunrise " + sunrise.Format("3:04&thinsp;pm")
-	sun2 := "sunset " + sunset.Format("3:04&thinsp;pm")
+	sun1 := "sunrise " + sunrise.Format(TimeFormat)
+	sun2 := "sunset " + sunset.Format(TimeFormat)
 	if sunrise.Seconds() > sunset.Seconds() {
 		sun1, sun2 = sun2, sun1
 	}
-	return map[string]string{
+	timeTmpl.Execute(w, map[string]string{
 		"Big":   now.Format("3:04"),
 		"Small": now.Format(":05&thinsp;pm"),
 		"Date":  now.Format("Monday, January 2"),
 		"Sun1":  sun1,
 		"Sun2":  sun2,
-	}
+	})
 }
+
+var timeTmpl = template.Must(template.New("time").Parse(`
+<div class=box style="width: 350px; height: 128px; top: 24px; left:28px; text-align: center; background-color: #eee">
+    <div class=header><span class=larger>{{.Big}}</span>{{.Small}}</div>
+    <div class=smaller>{{.Date}}</div>
+    <div class=smaller>{{.Sun1}}, {{.Sun2}}</div>
+</div>
+`))

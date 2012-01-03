@@ -23,38 +23,41 @@ func newParser(b []byte) (p *xml.Parser) {
 	return p
 }
 
-func Conditions(c appengine.Context) map[string]string {
+func Conditions(w io.Writer, c appengine.Context) {
 	item, err := memcache.Get(c, "conditions")
 	if err != nil {
 		c.Errorf("%q", err)
-		return nil
+		return
 	}
 
 	data := struct {
-		Temp_c      string
-		WindChill_c string
+		Temp_c      []byte
+		WindChill_c []byte
 		Wind_Mph    string
 	}{}
 	p := newParser(item.Value)
 	if err = p.Unmarshal(&data, nil); err != nil {
 		c.Errorf("%q", err)
-		return nil
+		return
 	}
 
-	result := make(map[string]string)
-	if data.Temp_c != "" {
-		result["Temp"] = template.HTMLEscapeString(data.Temp_c) + "°"
+	io.WriteString(w, `<div class=header>`)
+	if len(data.Temp_c) != 0 {
+		io.WriteString(w, `<span class=larger>`)
+		template.HTMLEscape(w, data.Temp_c)
+		io.WriteString(w, `°</span> `)
 	}
-	if data.WindChill_c != "" {
-		result["WindChill"] = "wind chill " + template.HTMLEscapeString(data.WindChill_c) + "°"
-	}
-	if data.Wind_Mph != "" {
+	if len(data.WindChill_c) != 0 {
+		io.WriteString(w, `wind chill `)
+		template.HTMLEscape(w, data.WindChill_c)
+		io.WriteString(w, `°`)
+	} else if data.Wind_Mph != "" {
 		mph, err := strconv.Atof64(data.Wind_Mph)
 		if err == nil {
-			result["Wind"] = fmt.Sprintf("wind %d&thinsp;km/h", int(mph*1.609344))
+			fmt.Fprintf(w, "wind %d&thinsp;km/h", int(mph*1.609344))
 		}
 	}
-	return result
+	io.WriteString(w, `</div>`)
 }
 
 var (
@@ -62,11 +65,11 @@ var (
 	thinspRegexp = regexp.MustCompile(`[0-9] (am|pm|km/h)`)
 )
 
-func Forecast(c appengine.Context) map[string]string {
+func Forecast(w io.Writer, c appengine.Context) {
 	item, err := memcache.Get(c, "forecast")
 	if err != nil {
 		c.Errorf("%q", err)
-		return nil
+		return
 	}
 
 	data := struct {
@@ -75,7 +78,7 @@ func Forecast(c appengine.Context) map[string]string {
 			TimeLayout []struct {
 				LayoutKey      string `xml:"layout-key"`
 				StartValidTime []struct {
-					PeriodName string `xml:"attr"`
+					PeriodName []byte `xml:"attr"`
 				}
 			}
 			Parameters struct {
@@ -89,15 +92,15 @@ func Forecast(c appengine.Context) map[string]string {
 	p := newParser(item.Value)
 	if err = p.Unmarshal(&data, nil); err != nil {
 		c.Errorf("%q", err)
-		return nil
+		return
 	}
 
-	forecast := ""
+	io.WriteString(w, `<div class=smaller style="text-align: left">`)
 	for _, d := range data.Data {
 		if d.Type != "forecast" {
 			continue
 		}
-		var periods []string
+		var periods [][]byte
 		for _, tl := range d.TimeLayout {
 			if tl.LayoutKey != d.Parameters.WordedForecast.TimeLayout {
 				continue
@@ -116,6 +119,10 @@ func Forecast(c appengine.Context) map[string]string {
 			texts = texts[:3]
 		}
 		for i, text := range texts {
+			io.WriteString(w, `<div style="margin-bottom: 8px"><span class=header>`)
+			template.HTMLEscape(w, periods[i])
+			io.WriteString(w, `:</span> `)
+
 			spaceSubs := make(map[int]string)
 			matches := nbspRegexp.FindAllStringIndex(text, -1)
 			for i := 0; i < len(matches[0]); i += 2 {
@@ -125,34 +132,17 @@ func Forecast(c appengine.Context) map[string]string {
 			for i := 0; i < len(matches[0]); i += 2 {
 				spaceSubs[matches[0][i]+1] = `<span style="white-space: nowrap">&thinsp;</span>`
 			}
-			cleanText := ""
 			for i, ch := range text {
 				sub, ok := spaceSubs[i]
 				if ok {
-					cleanText += sub
+					io.WriteString(w, sub)
 				} else {
-					cleanText += string(ch)
+					io.WriteString(w, string(ch))
 				}
 			}
-			forecast += fmt.Sprintf(
-				`<div style="margin-bottom: 8px"><span class=header>%s:</span> %s</div>`,
-				template.HTMLEscapeString(periods[i]),
-				cleanText)
+
+			io.WriteString(w, `</div>`)
 		}
 	}
-
-	return map[string]string{"Forecast": forecast}
+	io.WriteString(w, `</div>`)
 }
-
-// km/h, am, pm after number: convert no space or ASCII space to &thinsp;
-// sentence-ending number: change ASCII space to &nbsp;
-const dummyForecast = `
-<div><span class=header>Tonight:</span> Patchy fog after
-10&thinsp;pm. Otherwise, mostly cloudy, with a low
-around&nbsp;9. Northwest wind around 10&thinsp;km/h becoming
-calm.</div>
-
-<div style="margin-top: 8px"><span class=header>Saturday:</span>
-Patchy fog before 10&thinsp;am. Otherwise, mostly sunny, with a high
-near&nbsp;16. North northeast wind between 10 and 13&thinsp;km/h
-becoming calm.</div>`
