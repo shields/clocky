@@ -120,7 +120,6 @@ func freshen(c appengine.Context, key string) os.Error {
 		return err
 	}
 	stale := fresh + int64(s.Refresh)
-	c.Debugf("%s stale = %s", key, time.SecondsToUTC(stale).Format(time.RFC3339))
 	if stale > time.Seconds() {
 		return nil
 	}

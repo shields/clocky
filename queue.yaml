@@ -3,7 +3,7 @@
 
 queue:
 - name: freshen
-  rate: 1/s
+  rate: 100/s
 
 - name: fetch-nextbus
   rate: 6/m
