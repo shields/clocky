@@ -5,6 +5,7 @@ import (
 	"io"
 
 	"appengine"
+	"appengine/taskqueue"
 )
 
 const Lat, Lng = 37.79, -122.42
@@ -15,12 +16,12 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Data probably won't be fresh by the time we need it, but
-	// instead of blocking, it's better to serve what we have and
-	// warm up for the next refresh.
 	c := appengine.NewContext(r)
-	for _, s := range Sources {
-		go func(s *Source) { s.Freshen(c) }(s)
+	t := &taskqueue.Task{Path: "/freshen"}
+	if _, err := taskqueue.Add(c, t, "freshen"); err != nil {
+		c.Errorf("%s", err)
+		http.Error(w, err.String(), http.StatusInternalServerError)
+		return
 	}
 
 	// TODO: Refresh less often; use JS to tick clock.

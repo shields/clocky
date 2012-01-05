@@ -1,0 +1,15 @@
+# http://www.sfmta.com/cms/asite/nextmunidata.htm
+# http://graphical.weather.gov/xml/mdl/XML/Design/WebServicesUseGuildlines.php
+
+queue:
+- name: freshen
+  rate: 1/s
+
+- name: fetch-nextbus
+  rate: 6/m
+
+- name: fetch-forecast
+  rate: 1/h
+
+- name: fetch-conditions
+  rate: 1/h

@@ -12,19 +12,17 @@ import (
 
 	"appengine"
 	"appengine/memcache"
+	"appengine/taskqueue"
 	"appengine/urlfetch"
 )
 
 type Source struct {
-	Key                 string
 	URL                 string
 	Refresh, Expiration int
 }
 
-var Sources = []*Source{
-	&Source{
-		Key: "nextbus",
-		// http://www.sfmta.com/cms/asite/nextmunidata.htm
+var Sources = map[string]Source{
+	"nextbus": Source{
 		URL: ("http://webservices.nextbus.com/service/publicXMLFeed?" +
 			"command=predictionsForMultiStops&a=sf-muni" +
 			"&stops=47|null|6825" +
@@ -38,61 +36,51 @@ var Sources = []*Source{
 		Refresh:    10,
 		Expiration: 300,
 	},
-	&Source{
-		Key: "forecast",
+	"forecast": Source{
 		URL: ("http://forecast.weather.gov/MapClick.php?" +
 			"lat=37.79570&lon=-122.42100&FcstType=dwml&unit=1"),
-		// http://graphical.weather.gov/xml/mdl/XML/Design/WebServicesUseGuildlines.php
 		Refresh:    3600,
 		Expiration: 8 * 3600,
 	},
 	// A buoy near Crissy Field.
-	&Source{
-		Key: "conditions",
-		URL: "http://www.weather.gov/xml/current_obs/display.php?stid=FTPC1",
-		// http://graphical.weather.gov/xml/mdl/XML/Design/WebServicesUseGuildlines.php
+	"conditions": Source{
+		URL:        "http://www.weather.gov/xml/current_obs/display.php?stid=FTPC1",
 		Refresh:    3600,
 		Expiration: 4 * 3600,
 	},
 }
 
-func (s Source) Fetch(c appengine.Context) os.Error {
-	c.Debugf("fetching %s data", s.Key)
+func fetch(c appengine.Context, key string) os.Error {
+	s, ok := Sources[key]
+	if !ok {
+		return fmt.Errorf("%q not found", key)
+	}
 
+	c.Debugf("fetching %s data", key)
 	transport := urlfetch.Transport{Context: c, DeadlineSeconds: 60}
 	req, err := http.NewRequest("GET", s.URL, strings.NewReader(""))
 	if err != nil {
-		c.Errorf("%s", err)
 		return err
 	}
-	c.Debugf("XXX created request for %s", s.Key)
 	resp, err := transport.RoundTrip(req)
 	if err != nil {
-		c.Errorf("%s", err)
 		return err
 	}
-	c.Debugf("XXX called transport for %s", s.Key)
+	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
-		c.Errorf("fetch: bad status %d for %s", resp.StatusCode, s.Key)
-		return fmt.Errorf("fetch: bad status %d for %s", resp.StatusCode, s.Key)
+		return fmt.Errorf("fetch: bad status %d for %s", resp.StatusCode, s.URL)
 	}
-	c.Debugf("XXX reading body for %s", s.Key)
 	contents, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		c.Errorf("%s", err)
 		return err
 	}
-	c.Debugf("XXX closing %s", s.Key)
-	resp.Body.Close()
 
 	item := &memcache.Item{
-		Key:        s.Key,
+		Key:        key,
 		Value:      contents,
 		Expiration: int32(s.Expiration),
 	}
-	c.Debugf("XXX setting memcache for %s", s.Key)
 	if err := memcache.Set(c, item); err != nil {
-		c.Errorf("%s", err)
 		return err
 	}
 
@@ -104,51 +92,56 @@ func (s Source) Fetch(c appengine.Context) os.Error {
 	// weather forecast 3 minutes ago if the forecast is 48
 	// minutes old.
 	item = &memcache.Item{
-		Key:   s.Key + "_fresh",
+		Key:   key + "_fresh",
 		Value: []byte(strconv.Itoa64(time.Seconds())),
 	}
 	if err := memcache.Set(c, item); err != nil {
-		c.Errorf("%s", err)
 		return err
 	}
 
-	c.Infof("fetched %d bytes of %s data", len(contents), s.Key)
+	c.Infof("cached %d bytes of %s data", len(contents), key)
 	return nil
 }
 
-// Freshen calls Fetch iff the item is not known to be fresh.
-func (s *Source) Freshen(c appengine.Context) os.Error {
-	item, err := memcache.Get(c, s.Key+"_fresh")
+func freshen(c appengine.Context, key string) os.Error {
+	s, ok := Sources[key]
+	if !ok {
+		return fmt.Errorf("%q not found", key)
+	}
+
+	item, err := memcache.Get(c, key+"_fresh")
 	if err == memcache.ErrCacheMiss {
-		return s.Fetch(c)
+		return fetch(c, key)
 	} else if err != nil {
-		c.Errorf("%s", err)
-		// Something is wrong with memcache, so don't try to fetch.
 		return err
 	}
-
 	fresh, err := strconv.Atoi64(string(item.Value))
 	if err != nil {
-		c.Errorf("%s", err)
-		return s.Fetch(c)
+		return err
 	}
-
 	stale := fresh + int64(s.Refresh)
-	c.Debugf("%s stale = %s", s.Key, time.SecondsToUTC(stale).Format(time.RFC3339))
+	c.Debugf("%s stale = %s", key, time.SecondsToUTC(stale).Format(time.RFC3339))
 	if stale > time.Seconds() {
 		return nil
 	}
-	return s.Fetch(c)
+
+	t := &taskqueue.Task{Path: "/fetch/" + key}
+	if _, err := taskqueue.Add(c, t, "fetch-"+key); err != nil {
+		return err
+	}
+
+	return nil
 }
 
-func warmup(w http.ResponseWriter, r *http.Request) {
+func freshenHandler(w http.ResponseWriter, r *http.Request) {
 	c := appengine.NewContext(r)
 	ch := make(chan os.Error)
-	for _, s := range Sources {
-		go func(s *Source) { ch <- s.Freshen(c) }(s)
+	for key, _ := range Sources {
+		go func(key string) { ch <- freshen(c, key) }(key)
 	}
 	for _ = range Sources {
 		if err := <-ch; err != nil {
+			c.Errorf("%s", err)
 			http.Error(w, err.String(), http.StatusInternalServerError)
 			return
 		}
@@ -157,5 +150,18 @@ func warmup(w http.ResponseWriter, r *http.Request) {
 }
 
 func init() {
-	http.HandleFunc("/_ah/warmup", warmup)
+	http.HandleFunc("/freshen", freshenHandler)
+	http.HandleFunc("/_ah/warmup", freshenHandler)
+
+	for key, _ := range Sources {
+		h := func(key string) func(w http.ResponseWriter, r *http.Request) {
+			return func(w http.ResponseWriter, r *http.Request) {
+				if err := fetch(appengine.NewContext(r), key); err != nil {
+					http.Error(w, err.String(), http.StatusInternalServerError)
+					return
+				}
+			}
+		}(key)
+		http.HandleFunc("/fetch/"+key, h)
+	}
 }
