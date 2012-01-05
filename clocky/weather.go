@@ -123,8 +123,8 @@ func Forecast(w io.Writer, c appengine.Context) {
 				len(texts), len(periods))
 			continue
 		}
-		if len(texts) > 3 {
-			texts = texts[:3]
+		if len(texts) > 4 {
+			texts = texts[:4]
 		}
 		for i, text := range texts {
 			io.WriteString(w, `<div style="margin-bottom: 8px"><span class=header>`)
