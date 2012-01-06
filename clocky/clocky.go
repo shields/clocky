@@ -3,9 +3,9 @@ package clocky
 import (
 	"http"
 	"io"
+	"os"
 
 	"appengine"
-	"appengine/taskqueue"
 )
 
 const Lat, Lng = 37.79, -122.42
@@ -17,12 +17,8 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	c := appengine.NewContext(r)
-	t := &taskqueue.Task{Path: "/freshen"}
-	if _, err := taskqueue.Add(c, t, "freshen"); err != nil {
-		c.Errorf("%s", err)
-		http.Error(w, err.String(), http.StatusInternalServerError)
-		return
-	}
+	ch := make(chan os.Error)
+	go func() { ch <- freshenAll(c) }()
 
 	// TODO: Refresh less often; use JS to tick clock.
 	// TODO: Have browser refresh; safer since error pages will get retried.
@@ -42,6 +38,10 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	io.WriteString(w, `<div class=box style="width: 320px; top: 16px; left: 460px; font-size: 20px">`)
 	NextBus(w, c)
 	io.WriteString(w, `</div>`)
+
+	if err := <-ch; err != nil {
+		c.Errorf("%s", err)
+	}
 }
 
 func init() {

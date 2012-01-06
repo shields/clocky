@@ -132,25 +132,32 @@ func freshen(c appengine.Context, key string) os.Error {
 	return nil
 }
 
-func freshenHandler(w http.ResponseWriter, r *http.Request) {
-	c := appengine.NewContext(r)
+func freshenAll(c appengine.Context) os.Error {
 	ch := make(chan os.Error)
 	for key, _ := range Sources {
 		go func(key string) { ch <- freshen(c, key) }(key)
 	}
 	for _ = range Sources {
 		if err := <-ch; err != nil {
-			c.Errorf("%s", err)
-			http.Error(w, err.String(), http.StatusInternalServerError)
-			return
+			return err
 		}
+	}
+	return nil
+}
+
+func freshenAllHandler(w http.ResponseWriter, r *http.Request) {
+	c := appengine.NewContext(r)
+	if err := freshenAll(c); err != nil {
+		c.Errorf("%s", err)
+		http.Error(w, err.String(), http.StatusInternalServerError)
+		return
 	}
 	io.WriteString(w, "ok\n")
 }
 
 func init() {
-	http.HandleFunc("/freshen", freshenHandler)
-	http.HandleFunc("/_ah/warmup", freshenHandler)
+	http.HandleFunc("/freshen", freshenAllHandler)
+	http.HandleFunc("/_ah/warmup", freshenAllHandler)
 
 	for key, _ := range Sources {
 		h := func(key string) func(w http.ResponseWriter, r *http.Request) {
