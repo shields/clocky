@@ -1,15 +1,15 @@
-# http://www.sfmta.com/cms/asite/nextmunidata.htm
-# http://graphical.weather.gov/xml/mdl/XML/Design/WebServicesUseGuildlines.php
-
 queue:
 - name: freshen
   rate: 100/s
 
 - name: fetch-nextbus
   rate: 6/m
+  max_concurrent_requests: 1
 
 - name: fetch-forecast
   rate: 1/h
+  max_concurrent_requests: 1
 
 - name: fetch-conditions
-  rate: 1/h
+  rate: 10/m
+  max_concurrent_requests: 1
