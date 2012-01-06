@@ -171,6 +171,7 @@ func init() {
 					http.Error(w, err.String(), http.StatusInternalServerError)
 					return
 				}
+				io.WriteString(w, "ok\n")
 			}
 		}(key)
 		http.HandleFunc("/fetch/"+key, h)
