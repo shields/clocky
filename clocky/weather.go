@@ -3,6 +3,7 @@ package clocky
 import (
 	"fmt"
 	"io"
+	"math"
 	"os"
 	"regexp"
 	"strconv"
@@ -14,13 +15,14 @@ import (
 	"appengine/memcache"
 )
 
-func newParser(b []byte) (p *xml.Parser) {
-	// NWS serves XML in ISO-8859-1 for no reason; the data is really ASCII.
-	p = xml.NewParser(strings.NewReader(string(b)))
-	p.CharsetReader = func(charset string, input io.Reader) (io.Reader, os.Error) {
-		return input, nil
+// WindChill returns the Celsius wind chill (2001 North American
+// formula) for a given air temperature in degrees Celsius and a wind
+// speed in m/s.
+func WindChill(temp, wind float64) float64 {
+	if wind < 4.0/3 {
+		return temp
 	}
-	return p
+	return 13.12 + 0.6215*temp - 13.96*math.Pow(wind, 0.16) + 0.4867*temp*math.Pow(wind, 0.16)
 }
 
 func Conditions(w io.Writer, c appengine.Context) {
@@ -30,36 +32,38 @@ func Conditions(w io.Writer, c appengine.Context) {
 		return
 	}
 
-	data := struct {
-		Temp_c      string
-		WindChill_c string
-		Wind_Mph    string
-	}{}
-	p := newParser(item.Value)
-	if err = p.Unmarshal(&data, nil); err != nil {
-		c.Errorf("%s", err)
-		return
+	var temp, wind float64
+	for _, line := range strings.Split(string(item.Value), "\n") {
+		if len(line) != 116 || line[0] == '#' {
+			continue
+		}
+		// FTPC1 is a C-MAN automated buoy near Crissy Field.
+		if line[:5] != "FTPC1" {
+			continue
+		}
+		wind, err = strconv.Atof64(strings.TrimSpace(line[44:49]))
+		if err != nil {
+			c.Errorf("weather: bad wind speed in %q", line)
+			return
+		}
+		temp, err = strconv.Atof64(strings.TrimSpace(line[87:92]))
+		if err != nil {
+			c.Errorf("weather: bad temp in %q", line)
+			return
+		}
+		break
 	}
+	chill := WindChill(temp, wind)
 
 	io.WriteString(w, `<div class=header>`)
-	if len(data.Temp_c) != 0 {
-		io.WriteString(w, `<span class=larger>`)
-		template.HTMLEscape(w, []byte(data.Temp_c))
-		io.WriteString(w, `°</span> `)
-	}
-	if len(data.WindChill_c) != 0 {
-		io.WriteString(w, `wind chill `)
-		template.HTMLEscape(w, []byte(data.WindChill_c))
-		io.WriteString(w, `°`)
-	} else if data.Wind_Mph != "" {
-		mph, err := strconv.Atof64(data.Wind_Mph)
-		if err == nil {
-			if mph == 0 {
-				io.WriteString(w, "wind calm")
-			} else {
-				fmt.Fprintf(w, "wind %d&thinsp;km/h", int(mph*1.609344))
-			}
-		}
+	fmt.Fprintf(w, `<span class=larger>%.1f°</span> `, temp)
+	switch {
+	case chill < temp-1:
+		fmt.Fprintf(w, `wind chill %.1f°`, chill)
+	case wind*3.6 > 1:
+		fmt.Fprintf(w, "wind %d&thinsp;km/h", int(wind*3.6))
+	default:
+		io.WriteString(w, "wind calm")
 	}
 	io.WriteString(w, `</div>`)
 }
@@ -93,7 +97,11 @@ func Forecast(w io.Writer, c appengine.Context) {
 			}
 		}
 	}{}
-	p := newParser(item.Value)
+	p := xml.NewParser(strings.NewReader(string(item.Value)))
+	// NWS serves XML in ISO-8859-1 for no reason; the data is really ASCII.
+	p.CharsetReader = func(charset string, input io.Reader) (io.Reader, os.Error) {
+		return input, nil
+	}
 	if err = p.Unmarshal(&data, nil); err != nil {
 		c.Errorf("%s", err)
 		return

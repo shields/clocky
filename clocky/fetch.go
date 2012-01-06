@@ -42,11 +42,14 @@ var Sources = map[string]Source{
 		Refresh:    3600,
 		Expiration: 8 * 3600,
 	},
-	// A buoy near Crissy Field.
+	// NDBC latest observations for all points.  This file is much
+	// smaller than the file for any individual station, because
+	// the latter contains 45 days of 6-minute observations.
+	// http://www.ndbc.noaa.gov/measdes.shtml
 	"conditions": Source{
-		URL:        "http://www.weather.gov/xml/current_obs/display.php?stid=FTPC1",
-		Refresh:    3600,
-		Expiration: 4 * 3600,
+		URL:        "http://www.ndbc.noaa.gov/data/latest_obs/latest_obs.txt",
+		Refresh:    360,
+		Expiration: 1800,
 	},
 }
 
@@ -162,7 +165,9 @@ func init() {
 	for key, _ := range Sources {
 		h := func(key string) func(w http.ResponseWriter, r *http.Request) {
 			return func(w http.ResponseWriter, r *http.Request) {
-				if err := fetch(appengine.NewContext(r), key); err != nil {
+				c := appengine.NewContext(r)
+				if err := fetch(c, key); err != nil {
+					c.Errorf("%s", err)
 					http.Error(w, err.String(), http.StatusInternalServerError)
 					return
 				}
