@@ -19,7 +19,7 @@ import (
 // formula) for a given air temperature in degrees Celsius and a wind
 // speed in m/s.
 func WindChill(temp, wind float64) float64 {
-	if wind < 4.0/3 {
+	if temp >= 10 || wind < 4.0/3 {
 		return temp
 	}
 	return 13.12 + 0.6215*temp - 13.96*math.Pow(wind, 0.16) + 0.4867*temp*math.Pow(wind, 0.16)
