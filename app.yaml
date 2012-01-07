@@ -1,5 +1,5 @@
 application: msrl-clocky
-version: 6
+version: 7
 runtime: go
 api_version: 3
 
