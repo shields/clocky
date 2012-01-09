@@ -18,12 +18,38 @@ import (
 // WindChill returns the Celsius wind chill (2001 North American
 // formula) for a given air temperature in degrees Celsius and a wind
 // speed in km/h.
-func WindChill(temp, wind float64) *float64 {
-	if temp > 10 || wind <= 4.8 {
+func WindChill(temp, speed float64) *float64 {
+	if temp > 10 || speed <= 4.8 {
 		return nil
 	}
-	chill := 13.12 + 0.6215*temp - 11.37*math.Pow(wind, 0.16) + 0.3965*temp*math.Pow(wind, 0.16)
+	chill := 13.12 + 0.6215*temp - 11.37*math.Pow(speed, 0.16) + 0.3965*temp*math.Pow(speed, 0.16)
 	return &chill
+}
+
+func Cardinal(degrees int) string {
+	switch {
+	case degrees < 0:
+		break
+	case degrees < 23:
+		return "N"
+	case degrees < 68:
+		return "NW"
+	case degrees < 113:
+		return "W"
+	case degrees < 158:
+		return "SW"
+	case degrees < 203:
+		return "S"
+	case degrees < 248:
+		return "SE"
+	case degrees < 293:
+		return "E"
+	case degrees < 338:
+		return "NE"
+	case degrees < 360:
+		return "N"
+	}
+	return ""
 }
 
 func Conditions(w io.Writer, c appengine.Context) {
@@ -33,7 +59,9 @@ func Conditions(w io.Writer, c appengine.Context) {
 		return
 	}
 
-	var temp, wind, chill *float64
+	var dir string
+	var speed, temp, chill *float64
+
 	for _, line := range strings.Split(string(item.Value), "\n") {
 		if len(line) != 116 || line[0] == '#' {
 			continue
@@ -42,11 +70,16 @@ func Conditions(w io.Writer, c appengine.Context) {
 		if line[:5] != "FTPC1" {
 			continue
 		}
+		if n, err := strconv.Atoi(strings.TrimSpace(line[40:43])); err != nil || n < 0 || n > 359 {
+			c.Errorf("weather: bad wind direction in %q", line)
+		} else {
+			dir = Cardinal(n)
+		}
 		if n, err := strconv.Atof64(strings.TrimSpace(line[44:49])); err != nil {
 			c.Errorf("weather: bad wind speed in %q", line)
 		} else {
 			n *= 3.6 // m/s to km/h
-			wind = &n
+			speed = &n
 		}
 		if n, err := strconv.Atof64(strings.TrimSpace(line[87:92])); err != nil {
 			c.Errorf("weather: bad temp in %q", line)
@@ -55,8 +88,8 @@ func Conditions(w io.Writer, c appengine.Context) {
 		}
 		break
 	}
-	if temp != nil && wind != nil {
-		chill = WindChill(*temp, *wind)
+	if temp != nil && speed != nil {
+		chill = WindChill(*temp, *speed)
 	}
 
 	io.WriteString(w, `<div class=header>`)
@@ -67,12 +100,12 @@ func Conditions(w io.Writer, c appengine.Context) {
 		fmt.Fprintf(w, `<span class=larger>%.1f°</span> `, *temp)
 	}
 	switch {
-	case wind == nil:
+	case speed == nil:
 		// Output nothing.
 	case chill != nil:
 		fmt.Fprintf(w, `wind chill %.1f°`, *chill+0.05)
-	case *wind > 1:
-		fmt.Fprintf(w, "wind %d&thinsp;km/h", int(*wind+0.5))
+	case *speed > 1:
+		fmt.Fprintf(w, ` %s wind %d&thinsp;km/h`, dir, int(*speed+0.5))
 	default:
 		io.WriteString(w, `wind calm`)
 	}
