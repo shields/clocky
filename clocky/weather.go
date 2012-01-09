@@ -102,7 +102,7 @@ func Conditions(w io.Writer, c appengine.Context) {
 	switch {
 	case speed == nil:
 		// Output nothing.
-	case chill != nil:
+	case chill != nil && *chill < *temp-1:
 		fmt.Fprintf(w, `wind chill %.1f°`, *chill+0.05)
 	case *speed > 1:
 		fmt.Fprintf(w, ` %s wind %d&thinsp;km/h`, dir, int(*speed+0.5))
