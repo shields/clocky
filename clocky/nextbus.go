@@ -67,6 +67,7 @@ func NextBus(w io.Writer, c appengine.Context) {
 			title = strings.Replace(title, "Inbound", "inbound", -1)
 			title = strings.Replace(title, "Outbound", "outbound", -1)
 			title = strings.Replace(title, "Downtown", "downtown", -1)
+			title = strings.Replace(title, "Disrict", "District", -1)
 			template.HTMLEscape(w, []byte(title))
 			io.WriteString(w, `</span></div><div>`)
 			for i, pp := range d.Prediction {
