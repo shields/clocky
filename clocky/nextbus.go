@@ -30,6 +30,7 @@ func (p prediction) ToString() string {
 }
 
 var BoringMuniMessages = map[string]bool{
+	"On board, watch\nyour valuables.":                                        true,
 	"PROOF OF PAYMENT\nis required when\non a Muni vehicle\nor in a station.": true,
 	"sfmta.com or 3 1 1\nfor Muni info":                                       true,
 }
