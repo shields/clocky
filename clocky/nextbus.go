@@ -59,6 +59,23 @@ func NextBus(w io.Writer, c appengine.Context) {
 		return
 	}
 
+	// Messages are given per route, but they seem to be used for
+	// systemwide messages.  Annoyingly, not every route gets the
+	// message, so we can't infer that a message is about a
+	// systemwide event.
+	seen := make(map[string]bool)
+	for _, p := range data.Predictions {
+		for _, m := range p.Message {
+			if BoringMuniMessages[m.Text] || seen[m.Text] {
+				continue
+			}
+			seen[m.Text] = true
+			io.WriteString(w, `<div class=munimessage>`)
+			template.HTMLEscape(w, []byte(m.Text))
+			io.WriteString(w, `</div>`)
+		}
+	}
+
 	for _, p := range data.Predictions {
 		for _, d := range p.Direction {
 			io.WriteString(w, `<div class=bus><div class=route>`)
@@ -87,14 +104,6 @@ func NextBus(w io.Writer, c appengine.Context) {
 					io.WriteString(w, `, `)
 				}
 			}
-			io.WriteString(w, `</div>`)
-		}
-		for _, m := range p.Message {
-			if BoringMuniMessages[m.Text] {
-				continue
-			}
-			io.WriteString(w, `<div class=munimessage>`)
-			template.HTMLEscape(w, []byte(m.Text))
 			io.WriteString(w, `</div>`)
 		}
 	}
