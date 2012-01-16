@@ -105,7 +105,9 @@ func Conditions(w io.Writer, c appengine.Context) {
 	case chill != nil && *chill < *temp-1:
 		fmt.Fprintf(w, `wind chill %.1f°`, *chill+0.05)
 	case *speed > 1:
-		fmt.Fprintf(w, ` %s wind %d&thinsp;km/h`, dir, int(*speed+0.5))
+		fmt.Fprintf(w,
+			` %s wind <span style="white-space: nowrap">%d&thinsp;km/\u2060h</span>`,
+			dir, int(*speed+0.5))
 	default:
 		io.WriteString(w, `wind calm`)
 	}
@@ -183,6 +185,7 @@ func Forecast(w io.Writer, c appengine.Context) {
 			template.HTMLEscape(w, []byte(periods[i]))
 			io.WriteString(w, `:</span> `)
 
+			text = strings.Replace(text, "km/h", "km/\u2060h")
 			spaceSubs := make(map[int]string)
 			matches := nbspRegexp.FindAllStringIndex(text, -1)
 			if len(matches) > 0 {
