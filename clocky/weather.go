@@ -199,7 +199,7 @@ func Forecast(w io.Writer, c appengine.Context) {
 			template.HTMLEscape(w, []byte(periods[i]))
 			io.WriteString(w, `:</span> `)
 
-			text = strings.Replace(text, "km/h", "km/\u2060h")
+			text = strings.Replace(text, "km/h", "km/\u2060h", -1)
 			spaceSubs := make(map[int]string)
 			matches := nbspRegexp.FindAllStringIndex(text, -1)
 			if len(matches) > 0 {
