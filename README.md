@@ -1,3 +1,6 @@
+Clocky
+======
+
 Clocky displays the time, weather, and predicted bus arrivals.
 
 It's a web app, but the intention is not to use it in the web browser on
@@ -15,7 +18,7 @@ the GAE dev_appserver.
 
 
 Display device
-==============
+--------------
 
 What I'm trying to use is a rooted Nook Simple Touch.  It has an e-ink
 display, so it doesn't glow, and it doesn't look too much like a computer.
@@ -28,7 +31,7 @@ but this doesn't quite work yet.
 
 
 Customization
-=============
+-------------
 
 There is none.  It's not a service.  It displays the time and weather
 and bus arrivals near my home in San Francisco.  If your home is not
@@ -36,7 +39,7 @@ mine, you'll want to edit Sources in clocky/fetch.go.  Fork and enjoy.
 
 
 Data sources
-============
+------------
 
 Current time is from the system.
 
