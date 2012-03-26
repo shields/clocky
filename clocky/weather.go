@@ -120,7 +120,7 @@ func Conditions(w io.Writer, c appengine.Context) {
 		fmt.Fprintf(w, `wind chill %.1f°`, *chill+0.05)
 	case *speed > 1:
 		fmt.Fprintf(w,
-			` %s wind <span style="white-space: nowrap">%d&thinsp;km/\u2060h</span>`,
+			" %s wind <span style=\"white-space: nowrap\">%d&thinsp;km/\u2060h</span>",
 			dir, int(*speed+0.5))
 	default:
 		io.WriteString(w, `wind calm`)
