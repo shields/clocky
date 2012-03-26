@@ -1,4 +1,3 @@
-application: msrl-clocky
 queue:
 - name: freshen
   rate: 100/s
