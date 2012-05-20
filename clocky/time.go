@@ -15,8 +15,8 @@
 package clocky
 
 import (
+	"html/template"
 	"io"
-	"text/template" // TODO: Switch to Go 1's html/template.
 	"time"
 
 	"appengine"
@@ -24,7 +24,7 @@ import (
 	"solar"
 )
 
-const TimeFormat = "3:04&thinsp;pm"
+const TimeFormat = "3:04\u2009pm"
 
 const Zone = "America/Los_Angeles"
 
@@ -40,7 +40,7 @@ func Time(w io.Writer, c appengine.Context) {
 	}
 	timeTmpl.Execute(w, map[string]string{
 		"Big":   now.Format("3:04"),
-		"Small": now.Format(":05&thinsp;pm"),
+		"Small": now.Format(":05\u2009pm"),
 		"Date":  now.Format("Monday, January 2"),
 		"Sun1":  sun1,
 		"Sun2":  sun2,
