@@ -32,25 +32,25 @@ import (
 
 // Rise returns the time of the next sunrise.  This may be on a following day,
 // or many months later in the polar regions.
-func Rise(t *time.Time, lat, lng float64) *time.Time {
-	if math.Fabs(lat-sfLat) > 0.5 || math.Fabs(lng-sfLng) > 0.5 {
+func Rise(t time.Time, lat, lng float64) time.Time {
+	if math.Abs(lat-sfLat) > 0.5 || math.Abs(lng-sfLng) > 0.5 {
 		panic("solar: only San Francisco is supported")
 	}
 	return next(t, &riseData)
 }
 
-func Set(t *time.Time, lat, lng float64) *time.Time {
-	if math.Fabs(lat-sfLat) > 0.5 || math.Fabs(lng-sfLng) > 0.5 {
+func Set(t time.Time, lat, lng float64) time.Time {
+	if math.Abs(lat-sfLat) > 0.5 || math.Abs(lng-sfLng) > 0.5 {
 		panic("solar: only San Francisco is supported")
 	}
 	return next(t, &setData)
 }
 
-func next(t *time.Time, data *[12][31]int) *time.Time {
-	midnight := time.SecondsToUTC(t.Seconds() - (t.Seconds()-8*3600)%86400)
-	tt := time.SecondsToUTC(midnight.Seconds() + int64(data[t.Month-1][t.Day-1]))
-	if t.Seconds() > tt.Seconds() {
-		return next(time.SecondsToUTC(midnight.Seconds()+86400), data)
+func next(t time.Time, data *[12][31]int) time.Time {
+	midnight := time.Unix(t.Unix()-(t.Unix()-8*3600)%86400, 0).UTC()
+	tt := time.Unix(midnight.Unix()+int64(data[t.Month()-1][t.Day()-1]), 0).UTC()
+	if t.Unix() > tt.Unix() {
+		return next(time.Unix(midnight.Unix()+86400, 0).UTC(), data)
 	}
 	return tt
 }

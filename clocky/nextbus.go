@@ -1,4 +1,4 @@
-// Copyright 2011 Michael Shields
+// Copyright 2011-2012 Michael Shields
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,29 +15,29 @@
 package clocky
 
 import (
+	"encoding/xml"
+	"fmt"
 	"io"
-	"strconv"
 	"strings"
-	"template"
+	"text/template" // TODO: Switch to Go 1's html/template.
 	"time"
-	"xml"
 
 	"appengine"
 	"appengine/memcache"
 )
 
 type prediction struct {
-	EpochTime   int64 `xml:"attr"`
-	IsDeparture bool  `xml:"attr"`
+	Millis    int64 `xml:"epochTime,attr"`
+	Departure bool  `xml:"isDeparture,attr"`
 }
 
-func (p prediction) ToString() string {
-	s := p.EpochTime/1000 - time.Seconds()
-	if s < 60 {
+func (p prediction) String() string {
+	d := time.Unix(p.Millis/1000, p.Millis%1000).Sub(time.Now())
+	if d < 60*time.Second {
 		return "now"
 	}
-	result := strconv.Itoa64(s / 60)
-	if s < 600 && s%60 >= 30 {
+	result := fmt.Sprintf("%.0f", d.Minutes())
+	if d < 600*time.Second && int(d.Seconds())%60 >= 30 {
 		result += "½"
 	}
 	return result
@@ -58,17 +58,17 @@ func NextBus(w io.Writer, c appengine.Context) {
 
 	data := struct {
 		Predictions []struct {
-			RouteTag  string `xml:"attr"`
+			RouteTag  string `xml:"routeTag,attr"`
 			Direction []struct {
-				Title      string `xml:"attr"`
-				Prediction []prediction
-			}
+				Title      string       `xml:"title,attr"`
+				Prediction []prediction `xml:"prediction"`
+			} `xml:"direction"`
 			Message []struct {
-				Text string `xml:"attr"`
-			}
-		}
+				Text string `xml:"text,attr"`
+			} `xml:"message"`
+		} `xml:"predictions"`
 	}{}
-	if err := xml.Unmarshal(strings.NewReader(string(item.Value)), &data); err != nil {
+	if err := xml.Unmarshal(item.Value, &data); err != nil {
 		c.Errorf("%s", err)
 		return
 	}
@@ -104,10 +104,10 @@ func NextBus(w io.Writer, c appengine.Context) {
 			template.HTMLEscape(w, []byte(title))
 			io.WriteString(w, `</span></div><div>`)
 			for i, pp := range d.Prediction {
-				if pp.IsDeparture && i == 0 {
+				if pp.Departure && i == 0 {
 					io.WriteString(w, "departs ")
 				}
-				s := pp.ToString()
+				s := pp.String()
 				io.WriteString(w, s)
 				if i == len(d.Prediction)-1 {
 					if s == "1" {

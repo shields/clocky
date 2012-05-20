@@ -1,4 +1,4 @@
-// Copyright 2011 Michael Shields
+// Copyright 2011-2012 Michael Shields
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,9 +15,8 @@
 package clocky
 
 import (
-	"http"
 	"io"
-	"os"
+	"net/http"
 
 	"appengine"
 )
@@ -31,7 +30,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	c := appengine.NewContext(r)
-	ch := make(chan os.Error)
+	ch := make(chan error)
 	go func() { ch <- freshenAll(c) }()
 
 	// TODO: Refresh less often; use JS to tick clock.

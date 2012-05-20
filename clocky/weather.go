@@ -1,4 +1,4 @@
-// Copyright 2011 Michael Shields
+// Copyright 2011-2012 Michael Shields
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,15 +15,14 @@
 package clocky
 
 import (
+	"encoding/xml"
 	"fmt"
 	"io"
 	"math"
-	"os"
 	"regexp"
 	"strconv"
 	"strings"
-	"template"
-	"xml"
+	"text/template" // TODO: Switch to Go 1's html/template.
 
 	"appengine"
 	"appengine/memcache"
@@ -89,13 +88,13 @@ func Conditions(w io.Writer, c appengine.Context) {
 		} else {
 			dir = Cardinal(n)
 		}
-		if n, err := strconv.Atof64(strings.TrimSpace(line[44:49])); err != nil {
+		if n, err := strconv.ParseFloat(strings.TrimSpace(line[44:49]), 64); err != nil {
 			c.Errorf("weather: bad wind speed in %q", line)
 		} else {
 			n *= 3.6 // m/s to km/h
 			speed = &n
 		}
-		if n, err := strconv.Atof64(strings.TrimSpace(line[87:92])); err != nil {
+		if n, err := strconv.ParseFloat(strings.TrimSpace(line[87:92]), 64); err != nil {
 			c.Errorf("weather: bad temp in %q", line)
 		} else {
 			temp = &n
@@ -142,27 +141,27 @@ func Forecast(w io.Writer, c appengine.Context) {
 
 	data := struct {
 		Data []struct {
-			Type       string `xml:"attr"`
+			Type       string `xml:"type,attr"`
 			TimeLayout []struct {
 				LayoutKey      string `xml:"layout-key"`
 				StartValidTime []struct {
-					PeriodName string `xml:"attr"`
-				}
-			}
+					PeriodName string `xml:"period-name,attr"`
+				} `xml:"start-valid-time"`
+			} `xml:"time-layout"`
 			Parameters struct {
 				WordedForecast struct {
-					TimeLayout string   `xml:"attr"`
-					Text       []string `xml:"name>text"`
-				}
-			}
-		}
+					TimeLayout string   `xml:"time-layout,attr"`
+					Text       []string `xml:"text"`
+				} `xml:"wordedForecast"`
+			} `xml:"parameters"`
+		} `xml:"data"`
 	}{}
-	p := xml.NewParser(strings.NewReader(string(item.Value)))
+	p := xml.NewDecoder(strings.NewReader(string(item.Value)))
 	// NWS serves XML in ISO-8859-1 for no reason; the data is really ASCII.
-	p.CharsetReader = func(charset string, input io.Reader) (io.Reader, os.Error) {
+	p.CharsetReader = func(charset string, input io.Reader) (io.Reader, error) {
 		return input, nil
 	}
-	if err = p.Unmarshal(&data, nil); err != nil {
+	if err = p.DecodeElement(&data, nil); err != nil {
 		c.Errorf("%s", err)
 		return
 	}
